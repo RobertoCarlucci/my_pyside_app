@@ -1,4 +1,5 @@
 import sys
+import pandas  # noqa: F401 — must be imported before PySide6 to avoid shibokensupport/six conflict
 from PySide6.QtWidgets import QApplication
 from ui.main_window import MainWindow
 
