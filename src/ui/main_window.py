@@ -21,18 +21,39 @@ class MainWindow(QWidget):
         # Layout
         layout = QVBoxLayout()
 
-        # Label centrata, corpo 8, colore rosso
+        # Label centrata, corpo 12, bold, colore rosso
         self.label = QLabel("Benvenuto nella tua app PySide6!")
         self.label.setAlignment(Qt.AlignCenter)
 
-        font = QFont()
-        font.setPointSize(8)
-        self.label.setFont(font)
+        font_label = QFont()
+        font_label.setPointSize(12)
+        font_label.setBold(True)
+        self.label.setFont(font_label)
 
         self.label.setStyleSheet("color: red;")
 
-        # Pulsante
+        # Pulsante con sfondo giallo, testo fucsia, corpo 12 bold
         button = QPushButton("Cliccami")
+
+        font_button = QFont()
+        font_button.setPointSize(12)
+        font_button.setBold(True)
+        button.setFont(font_button)
+
+        button.setStyleSheet(
+            """
+            QPushButton {
+                background-color: yellow;
+                color: fuchsia;
+                border: 2px solid #555;
+                padding: 6px;
+            }
+            QPushButton:hover {
+                background-color: #fff799;
+            }
+        """
+        )
+
         button.clicked.connect(self.on_click)
 
         layout.addWidget(self.label)
