@@ -28,12 +28,19 @@ class FileModel:
         return None
 
     @classmethod
+    def get_tipi_colonne(cls, codice_file: str) -> dict | None:
+        modello = cls.load_model(codice_file)
+        if modello:
+            return modello.get("tipi_colonne", None)
+        return None
+
+    @classmethod
     def verifica_colonne(cls, df, codice_file: str):
         colonne_attese = cls.get_colonne_attese(codice_file)
         if not colonne_attese:
             return False, df
 
-        ok, df_validato = ExcelValidator.valida(df, colonne_attese)
+        ok, df_validato, _ = ExcelValidator.valida(df, colonne_attese)
         return ok, df_validato
 
     @classmethod
