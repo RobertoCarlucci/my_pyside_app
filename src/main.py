@@ -9,6 +9,7 @@ from excel.file_selector import FileSelector
 from excel.file_authorizer import FileAuthorizer
 from excel.file_model import FileModel
 from excel.excel_loader import carica_excel
+from excel.excel_validator import ExcelValidator
 
 
 class MainWindow(QWidget):
@@ -105,22 +106,30 @@ class MainWindow(QWidget):
         if not file_path:
             return
 
-        # 2. Controllo autorizzazione
-        if not FileAuthorizer.is_autorizzato(file_path):
+        # 1. Ottieni il codice del file (es. "res10")
+        codice = FileAuthorizer.get_codice(file_path)
+        if codice is None:
             self.label.setText("❌ File non autorizzato")
             return
 
-        codice = FileAuthorizer.get_codice(file_path)
-
-        # 3. Caricamento Excel
+        # 2. Carica Excel
         df = carica_excel(file_path)
         if df is None:
             self.label.setText("❌ Errore nel caricamento Excel")
             return
 
-        # 4. Verifica struttura colonne
-        if not FileModel.verifica_colonne(df, codice):
-            self.label.setText("❌ Struttura colonne non valida")
+        # 3. Ottieni le colonne attese dal modello JSON
+        colonne_attese = FileModel.get_colonne_attese(codice)
+        if not colonne_attese:
+            self.label.setText("❌ Modello colonne non trovato")
+            return
+
+        # 4. Valida e mappa le colonne
+        ok, df_validato, errori = ExcelValidator.valida(df, colonne_attese)
+
+        if not ok:
+            self.label.setText("❌ Errori nella struttura del file")
+            print(errori)  # utile per debug
             return
 
         # 5. Import riuscito
