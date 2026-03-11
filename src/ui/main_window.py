@@ -19,7 +19,7 @@ class MainWindow(QWidget):
 
         # Sfondo verde chiaro
         palette = self.palette()
-        palette.setColor(QPalette.Window, QColor("#ccffcc"))
+        palette.setColor(QPalette.ColorRole.Window, QColor("#ccffcc"))
         self.setPalette(palette)
         self.setAutoFillBackground(True)
 
@@ -28,7 +28,7 @@ class MainWindow(QWidget):
 
         # Label centrata, corpo 12, bold, rossa
         self.label = QLabel("Benvenuto nella tua app PySide6!")
-        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         font_label = QFont()
         font_label.setPointSize(12)
@@ -95,4 +95,13 @@ class MainWindow(QWidget):
 
     def importa_excel(self):
         """Apre un file Excel e mostra quante righe contiene."""
-        file_path
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Seleziona file Excel", "", "File Excel (*.xlsx *.xls)"
+        )
+        if not file_path:
+            return
+        df = carica_excel(file_path)
+        if df is None:
+            self.label.setText("Errore nel caricamento del file Excel")
+            return
+        self.label.setText(f"Excel importato: {len(df)} righe")
