@@ -1,5 +1,6 @@
 import json
 import os
+from excel.excel_validator import ExcelValidator
 
 
 class FileModel:
@@ -27,12 +28,13 @@ class FileModel:
         return None
 
     @classmethod
-    def verifica_colonne(cls, df, codice_file: str) -> bool:
+    def verifica_colonne(cls, df, codice_file: str):
         colonne_attese = cls.get_colonne_attese(codice_file)
         if not colonne_attese:
-            return False
+            return False, df
 
-        return all(col in df.columns for col in colonne_attese)
+        ok, df_validato = ExcelValidator.valida(df, colonne_attese)
+        return ok, df_validato
 
     @classmethod
     def get_all_models(cls):
