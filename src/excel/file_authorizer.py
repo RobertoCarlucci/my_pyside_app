@@ -1,17 +1,30 @@
 import os
+from excel.file_model import FileModel
 
 
 class FileAuthorizer:
-    """Controlla se un file Excel è autorizzato all'import."""
-
-    FILE_CONOSCIUTI = {"RES10.xlsx": "res10"}  # puoi associare un codice interno
+    """
+    Autorizza i file Excel confrontando il nome con i modelli JSON.
+    """
 
     @classmethod
     def is_autorizzato(cls, file_path: str) -> bool:
         nome = os.path.basename(file_path)
-        return nome in cls.FILE_CONOSCIUTI
+
+        for codice in FileModel.get_all_models():
+            modello = FileModel.load_model(codice)
+            if modello and modello["nome_file"] == nome:
+                return True
+
+        return False
 
     @classmethod
     def get_codice(cls, file_path: str):
         nome = os.path.basename(file_path)
-        return cls.FILE_CONOSCIUTI.get(nome)
+
+        for codice in FileModel.get_all_models():
+            modello = FileModel.load_model(codice)
+            if modello and modello["nome_file"] == nome:
+                return modello["codice"]
+
+        return None
