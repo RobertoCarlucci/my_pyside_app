@@ -4,7 +4,13 @@ from excel.file_model import FileModel
 from excel.excel_loader import carica_excel
 from excel.excel_validator import ExcelValidator
 from excel.excel_importer import ExcelImporter
+
+from ges_error.error_reporter import ErrorReporter
+from ui.error_dialog import ErrorDialog
 from ui.preview_excel import PreviewExcel
+from ui.warning_dialog import WarningDialog
+from excel.excel_logger import ExcelLogger
+from PySide6.QtWidgets import QDialog
 
 
 class MainExcel:
@@ -50,11 +56,32 @@ class MainExcel:
         tipi_attesi = FileModel.get_tipi_colonne(codice)
 
         # 6. Validazione + mappatura + tipi
-        ok, df_validato, errori = ExcelValidator.valida(df, colonne_attese, tipi_attesi)
+        ok, df_validato, errori, warning = ExcelValidator.valida(
+            df, colonne_attese, tipi_attesi
+        )
 
-        if not ok:
-            self.ui.label.setText("❌ Errori nella struttura del file")
-            print("Errori:", errori)
+        # ERRORI → bloccanti
+        if errori:
+            reporter = ErrorReporter()
+            reporter.extend_errors(errori)
+
+            dlg = ErrorDialog(reporter.get_error_text())
+            dlg.exec()
+
+            self.ui.label.setText("❌ Importazione annullata")
+            return
+
+        # WARNING → chiedi conferma
+        risposta = QDialog.DialogCode.Accepted
+        if warning:
+            reporter = ErrorReporter()
+            reporter.extend_warnings(warning)
+
+            dlg = WarningDialog(reporter.get_warning_text())
+            risposta = dlg.exec()
+
+        if risposta == QDialog.DialogCode.Rejected:
+            self.ui.label.setText("⚠️ Importazione annullata dall'utente")
             return
 
         # 7. Mostra anteprima
@@ -66,6 +93,12 @@ class MainExcel:
             #     ExcelImporter.importa_res20(df_validato)
             # elif codice == "res30":
             #     ExcelImporter.importa_res30(df_validato)
+
+            # LOG SUCCESS
+            evento = ExcelLogger.crea_evento(
+                file_path=file_path, codice=codice, righe=len(df_validato), esito="OK"
+            )
+            ExcelLogger.log(evento)
 
             self.ui.label.setText("✔️ Importazione completata")
 

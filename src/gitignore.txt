@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+
+# VS Code
+.vscode/
+
+# Qt / PySide
+*.qrc
+*.ui~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+5. Configurazione per GitHub (file .gitignore)
+Se prevedi di caricare il progetto su GitHub, è fondamentale che i file dell'ambiente virtuale non vengano caricati:
+
+    Crea un file chiamato esattamente .gitignore nella cartella principale.
+    Scrivici dentro: .venv/ e __pycache__/. 
+
+🧪 Crea un ambiente virtuale
+
+È la scelta migliore per evitare conflitti tra librerie.
+bash
+
+python -m venv venv
+
+Attiva l’ambiente:
+
+    Windows
+    bash
+
+    venv\Scripts\activate
+
+📦 Installa PySide6
+
+bash
+
+pip install pyside6
+
+Salva le dipendenze:
+bash
+
+pip freeze > requirements.txt
+
+1. Seleziona l’interprete del venv
+
+In VS Code:
+
+    Ctrl+Shift+P
+
+    Cerca Python: Select Interpreter
+
+    Scegli quello dentro la cartella venv
+
+Esempio:
+Codice
+
+./venv/bin/python
+
+o su Windows:
+Codice
+
+.\venv\Scripts\python.exe
+
+Questo è il passaggio fondamentale.
+
+2. Abilita l’attivazione automatica del venv nel terminale
+
+Vai su:
+
+File → Preferences → Settings  
+Cerca: Python › Terminal: Activate Environment
+
+Assicurati che sia attivo.
+
+🧪 Verifica
+
+Apri un nuovo terminale in VS Code:
+Codice
+
+python --version
+
+Dovrebbe puntare al Python del venv.
+

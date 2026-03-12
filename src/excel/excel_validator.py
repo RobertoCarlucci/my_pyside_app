@@ -61,6 +61,23 @@ class ExcelValidator:
         return True, df, []
 
     # ---------------------------------------------------------
+    # NUOVO: TROVA COLONNE EXTRA
+    # ---------------------------------------------------------
+    @staticmethod
+    def trova_colonne_extra(df: pd.DataFrame, colonne_attese: list):
+        """
+        Restituisce una lista di colonne presenti nel file
+        ma NON previste dal modello.
+        """
+        colonne_extra = []
+
+        for col in df.columns:
+            if col not in colonne_attese:
+                colonne_extra.append(col)
+
+        return colonne_extra
+
+    # ---------------------------------------------------------
     # VALIDAZIONE TIPI
     # ---------------------------------------------------------
     @staticmethod
@@ -110,24 +127,33 @@ class ExcelValidator:
         return True, df, []
 
     # ---------------------------------------------------------
-    # VALIDAZIONE COMPLETA
+    # VALIDAZIONE COMPLETA (AGGIORNATA)
     # ---------------------------------------------------------
     @staticmethod
     def valida(df: pd.DataFrame, colonne_attese: list, tipi_attesi: dict | None = None):
         """
         1. Rimuove header vuoto
         2. Mappa colonne
-        3. Valida tipi (se presenti)
+        3. Warning colonne extra
+        4. Valida tipi (se presenti)
         """
         df = ExcelValidator.rimuovi_header_vuoto(df)
 
+        # 1) Mappatura colonne
         ok, df, errori = ExcelValidator.mappa_colonne(df, colonne_attese)
         if not ok:
-            return False, df, errori
+            return False, df, errori, []
 
+        # 2) Colonne extra → WARNING
+        warning = []
+        colonne_extra = ExcelValidator.trova_colonne_extra(df, colonne_attese)
+        for col in colonne_extra:
+            warning.append(f"Colonna extra non prevista: {col}")
+
+        # 3) Validazione tipi
         if tipi_attesi:
             ok, df, errori_tipi = ExcelValidator.valida_tipi(df, tipi_attesi)
             if not ok:
-                return False, df, errori + errori_tipi
+                return False, df, errori_tipi, warning
 
-        return True, df, []
+        return True, df, [], warning
