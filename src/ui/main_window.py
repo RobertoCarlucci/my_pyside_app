@@ -17,6 +17,9 @@ class MainWindow(QWidget):
         init_db()
 
         self.setWindowTitle("Gestione Excel")
+        self._bg_label = (
+            None  # inizializzato prima di resize() che triggera resizeEvent
+        )
         self.resize(800, 600)
 
         # SFONDO PERSONALIZZATO
