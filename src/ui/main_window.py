@@ -1,9 +1,13 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
-from PySide6.QtGui import QPalette, QColor, QFont
+from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 
 from db.database import init_db, inserisci_utente, lista_utenti
 from controllers.main_excel import MainExcel
+
+# IMPORTA I MODULI DI STILE
+from ui.style.background_style import apply_background
+from ui.style.button_styles import apply_button_style
 
 
 class MainWindow(QWidget):
@@ -12,37 +16,33 @@ class MainWindow(QWidget):
 
         init_db()
 
-        self.resize(600, 400)
-        self.setWindowTitle("Template PySide6 + SQLite + Excel")
+        self.setWindowTitle("Gestione Excel")
+        self.resize(800, 600)
 
-        palette = self.palette()
-        palette.setColor(QPalette.Window, QColor("#ccffcc"))
-        self.setPalette(palette)
-        self.setAutoFillBackground(True)
+        # SFONDO PERSONALIZZATO
+        self._bg_label = apply_background(
+            self, "assets/backgrounds/wallpaper_dl.png", opacity=0.35
+        )
 
         layout = QVBoxLayout()
 
         # Label
         self.label = QLabel("Benvenuto nella tua app PySide6!")
-        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         font_label = QFont()
         font_label.setPointSize(12)
         font_label.setBold(True)
         self.label.setFont(font_label)
-        self.label.setStyleSheet("color: red;")
+        self.label.setStyleSheet("color: white; background-color: transparent;")
 
         # Pulsanti
-        font_button = QFont()
-        font_button.setPointSize(12)
-        font_button.setBold(True)
-
         button_db = QPushButton("Salva utente")
-        button_db.setFont(font_button)
+        apply_button_style(button_db, "primary")
         button_db.clicked.connect(self.on_click)
 
         button_excel = QPushButton("Importa Excel")
-        button_excel.setFont(font_button)
+        apply_button_style(button_excel, "primary")
 
         # Collegamento al controller Excel
         self.excel = MainExcel(self)
@@ -53,6 +53,26 @@ class MainWindow(QWidget):
         layout.addWidget(button_excel)
 
         self.setLayout(layout)
+
+    def resizeEvent(self, event):
+        """Ridimensiona lo sfondo mantenendo il fattore di forma (cover centrato)."""
+        super().resizeEvent(event)
+        bg = self._bg_label
+        if bg is None:
+            return
+        src: object = getattr(bg, "_src_pixmap", None)
+        if src is None:
+            return
+        scaled = src.scaled(  # type: ignore[union-attr]
+            self.size(),
+            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
+            Qt.TransformationMode.SmoothTransformation,
+        )
+        # Centra la label in modo che l'immagine copra tutta la finestra
+        x = (self.width() - scaled.width()) // 2
+        y = (self.height() - scaled.height()) // 2
+        bg.setPixmap(scaled)
+        bg.setGeometry(x, y, scaled.width(), scaled.height())
 
     def on_click(self):
         inserisci_utente("Roberto")
