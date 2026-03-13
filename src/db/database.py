@@ -31,6 +31,30 @@ def inserisci_res10_record(**kwargs):
     conn.close()
 
 
+def inserisci_res10_bulk(righe: list[dict]):
+    """
+    Inserisce tutte le righe del file res10 in un'unica transazione.
+    righe: lista di dict {colonna: valore} già convertiti in tipi Python nativi.
+    """
+    if not righe:
+        return
+
+    colonne = list(righe[0].keys())
+    colonne_sql = ", ".join(f'"{c}"' for c in colonne)
+    placeholders = ", ".join(["?"] * len(colonne))
+    sql = f"INSERT INTO res10 ({colonne_sql}) VALUES ({placeholders})"
+
+    valori = [tuple(r[c] for c in colonne) for r in righe]
+
+    conn = get_connection()
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")  # scritture concorrenti più veloci
+        conn.executemany(sql, valori)
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def init_db():
     """Crea il database e le tabelle se non esistono."""
     conn = get_connection()
