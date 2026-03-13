@@ -23,13 +23,14 @@ def _to_sqlite(val):
 class ExcelImporter:
 
     @staticmethod
-    def importa_res10(df):
+    def importa_res10(df, progress_callback=None):
         """
         Importa i dati del file res10 nel DB in un'unica transazione.
         df = DataFrame validato e mappato
+        progress_callback(current, total): opzionale, per aggiornare la UI.
         """
         righe = [
             {col: _to_sqlite(val) for col, val in row.items()}
             for _, row in df.iterrows()
         ]
-        inserisci_res10_bulk(righe)
+        inserisci_res10_bulk(righe, progress_callback)

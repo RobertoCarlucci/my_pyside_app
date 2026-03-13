@@ -31,10 +31,12 @@ def inserisci_res10_record(**kwargs):
     conn.close()
 
 
-def inserisci_res10_bulk(righe: list[dict]):
+def inserisci_res10_bulk(righe: list[dict], progress_callback=None):
     """
     Inserisce tutte le righe del file res10 in un'unica transazione.
+    Svuota la tabella prima del caricamento.
     righe: lista di dict {colonna: valore} già convertiti in tipi Python nativi.
+    progress_callback(current, total): chiamato dopo ogni batch.
     """
     if not righe:
         return
@@ -45,11 +47,17 @@ def inserisci_res10_bulk(righe: list[dict]):
     sql = f"INSERT INTO res10 ({colonne_sql}) VALUES ({placeholders})"
 
     valori = [tuple(r[c] for c in colonne) for r in righe]
+    totale = len(valori)
+    BATCH = 100
 
     conn = get_connection()
     try:
-        conn.execute("PRAGMA journal_mode=WAL")  # scritture concorrenti più veloci
-        conn.executemany(sql, valori)
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("DELETE FROM res10")  # svuota la tabella prima del caricamento
+        for i in range(0, totale, BATCH):
+            conn.executemany(sql, valori[i : i + BATCH])
+            if progress_callback:
+                progress_callback(min(i + BATCH, totale), totale)
         conn.commit()
     finally:
         conn.close()

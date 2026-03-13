@@ -10,7 +10,8 @@ from ui.error_dialog import ErrorDialog
 from ui.preview_excel import PreviewExcel
 from ui.warning_dialog import WarningDialog
 from excel.excel_logger import ExcelLogger
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QProgressDialog, QApplication
+from PySide6.QtCore import Qt
 
 
 class MainExcel:
@@ -86,13 +87,31 @@ class MainExcel:
 
         # 7. Mostra anteprima
         def conferma_import():
+            # Barra di avanzamento
+            totale = len(df_validato)
+            progress = QProgressDialog(
+                "Salvataggio in corso...", "", 0, totale, self.ui
+            )
+            progress.setCancelButton(None)
+            progress.setWindowTitle("Importazione RES10")
+            progress.setWindowModality(Qt.WindowModality.WindowModal)
+            progress.setMinimumDuration(0)
+            progress.setValue(0)
+            progress.show()
+            QApplication.processEvents()
+
+            def on_progress(current, total):
+                progress.setValue(current)
+                QApplication.processEvents()
+
             # IMPORTAZIONE SPECIFICA PER IL FILE
             if codice == "res10":
-                ExcelImporter.importa_res10(df_validato)
+                ExcelImporter.importa_res10(df_validato, on_progress)
             # elif codice == "res20":
-            #     ExcelImporter.importa_res20(df_validato)
-            # elif codice == "res30":
-            #     ExcelImporter.importa_res30(df_validato)
+            #     ExcelImporter.importa_res20(df_validato, on_progress)
+
+            progress.setValue(totale)
+            progress.close()
 
             # LOG SUCCESS
             evento = ExcelLogger.crea_evento(

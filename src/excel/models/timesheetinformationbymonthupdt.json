@@ -1,0 +1,20 @@
+{
+    "nome_file": "TimesheetInformationByMonth_Updt.xlsx",
+    "codice": "timesheetinformationbymonthupdt",
+    "colonne_attese": [
+        "Short Name",
+        "Screened Disapproved",
+        "Screened Overdue",
+        "Screened Submitted",
+        "Screened To Approve",
+        "Date"
+    ],
+    "tipi_colonne": {
+        "Short Name": "string",
+        "Screened Disapproved": "int",
+        "Screened Overdue": "int",
+        "Screened Submitted": "int",
+        "Screened To Approve": "int",
+        "Date": "date"
+    }
+}
