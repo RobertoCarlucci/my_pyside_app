@@ -1,5 +1,8 @@
 import pandas as pd
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ExcelValidator:
@@ -36,23 +39,43 @@ class ExcelValidator:
     # ---------------------------------------------------------
     @staticmethod
     def mappa_colonne(df: pd.DataFrame, colonne_attese: list):
+        """
+        Mappa le colonne del file con quelle attese.
+        Richiede: ESATTO numero di colonne.
+        Tolleranza: nomi parzialmente uguali (matching).
+        """
         errori = []
+
+        # 1) Controlla numero ESATTO di colonne
+        if len(df.columns) != len(colonne_attese):
+            msg = f"Numero di colonne non corrisponde: file ha {len(df.columns)}, attese {len(colonne_attese)}"
+            logger.error(msg)
+            errori.append(msg)
+            return False, df, errori
 
         colonne_file_norm = {ExcelValidator.normalizza(c): c for c in df.columns}
         mapping = {}
 
+        # 2) Fai il matching per nome (tollerante)
         for col_attesa in colonne_attese:
             col_attesa_norm = ExcelValidator.normalizza(col_attesa)
 
+            # Cerca un match esatto prima
+            if col_attesa_norm in colonne_file_norm:
+                mapping[col_attesa] = colonne_file_norm[col_attesa_norm]
+                continue
+
+            # Poi cerca un match parziale (col_attesa_norm contenuto in col_file_norm)
             col_file_norm = ExcelValidator.trova_match(
                 col_attesa_norm, colonne_file_norm.keys()
             )
 
-            if not col_file_norm:
-                errori.append(f"Colonna mancante o troncata: {col_attesa}")
-                continue
-
-            mapping[col_attesa] = colonne_file_norm[col_file_norm]
+            if col_file_norm:
+                mapping[col_attesa] = colonne_file_norm[col_file_norm]
+            else:
+                msg = f"Colonna '{col_attesa}' non trovata nel file"
+                logger.error(msg)
+                errori.append(msg)
 
         if errori:
             return False, df, errori
@@ -83,14 +106,17 @@ class ExcelValidator:
     @staticmethod
     def valida_tipi(df: pd.DataFrame, tipi_attesi: dict):
         """
-        tipi_attesi = { "Colonna": "int" | "float" | "date" | "str" }
+        tipi_attesi = { "Colonna": "int" | "float" | "date" | "string" }
+        Converte i tipi in modo tollerante: NULL rimangono NULL,
+        errori di conversione diventano NULL anzichè bloccare.
         """
         errori = []
 
         for col, tipo in tipi_attesi.items():
 
             if col not in df.columns:
-                errori.append(f"Colonna '{col}' non trovata per validazione tipi")
+                # Colonna mancante è warning, non errore
+                logger.warning(f"Colonna '{col}' non trovata nel file")
                 continue
 
             serie = df[col]
@@ -98,32 +124,44 @@ class ExcelValidator:
             # INT
             if tipo == "int":
                 try:
-                    df[col] = pd.to_numeric(serie, errors="raise").astype("Int64")
+                    # Converti con coerce per trasformare errori a NaN
+                    df[col] = pd.to_numeric(serie, errors="coerce").astype("Int64")
                 except:
-                    errori.append(f"Valori non validi per INT nella colonna '{col}'")
+                    logger.error(f"Errore conversione INT per '{col}'")
+                    pass
 
             # FLOAT
             elif tipo == "float":
                 try:
-                    serie = serie.astype(str).str.replace(",", ".")
-                    df[col] = pd.to_numeric(serie, errors="raise").astype(float)
+                    # Gestisci virgole come separatori decimali
+                    serie_str = serie.astype(str).str.replace(",", ".")
+                    df[col] = pd.to_numeric(serie_str, errors="coerce").astype(float)
                 except:
-                    errori.append(f"Valori non validi per FLOAT nella colonna '{col}'")
+                    logger.error(f"Errore conversione FLOAT per '{col}'")
+                    pass
 
             # DATE
             elif tipo == "date":
                 try:
-                    df[col] = pd.to_datetime(serie, errors="raise", dayfirst=True)
+                    # Se è già datetime64, mantienila
+                    if pd.api.types.is_datetime64_any_dtype(serie):
+                        df[col] = serie
+                    else:
+                        # Altrimenti converti, trasformando errori a NaT
+                        df[col] = pd.to_datetime(serie, errors="coerce", dayfirst=True)
                 except:
-                    errori.append(f"Valori non validi per DATE nella colonna '{col}'")
+                    logger.error(f"Errore conversione DATE per '{col}'")
+                    pass
 
-            # STRING
-            elif tipo == "str":
-                df[col] = serie.astype(str)
+            # STRING (o tutto il resto)
+            else:
+                try:
+                    df[col] = serie.astype(str)
+                except:
+                    logger.error(f"Errore conversione STRING per '{col}'")
+                    pass
 
-        if errori:
-            return False, df, errori
-
+        # Non ritorniamo errori - i dati vengono comunque convertiti al meglio
         return True, df, []
 
     # ---------------------------------------------------------

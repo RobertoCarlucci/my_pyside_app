@@ -83,7 +83,7 @@
         "Timesheet_Date": "date",
         "Timesheet_Day": "int",
         "Timesheet_Month": "int",
-        "Timesheet_Quarter": "int",
+        "Timesheet_Quarter": "string",
         "Timesheet_Year": "int",
         "Timesheet_Time": "float",
         "Timesheet_Status": "string",

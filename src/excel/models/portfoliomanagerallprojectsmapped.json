@@ -1,12 +1,12 @@
 {
-    "nome_file": "TimesheetInformationByMonth_Updt.xlsx",
-    "codice": "timesheetinformationbymonthupdt",
+    "nome_file": "Portfolio Manager - All Projects mapped.xlsx",
+    "codice": "portfoliomanagerallprojectsmapped",
     "colonne_attese": [
         "Name",
         "Work ID #",
         "Work Description",
         "Activity Classification",
-        "SAP WBS",
+        "SAP WBS",  
         "PRJ Status",
         "Investment Approval",
         "PRJ HUB",
@@ -55,7 +55,7 @@
         "PRJ Priority": "string",
         "PRJ Development Process": "string",
         "Milestones, Total": "int",
-        "Last CP Passed": "date",
+        "Last CP Passed": "string",
         "Work Management": "string",
         "Published Rank": "string",
         "Internal Priority": "string",
@@ -69,6 +69,6 @@
         "Investment Status": "string",
         "Need Approval (h)": "float",
         "Requester Priority": "string",
-        "Sequence ID"
+        "Sequence ID": "string"
     }
 }

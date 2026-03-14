@@ -63,6 +63,38 @@ def inserisci_res10_bulk(righe: list[dict], progress_callback=None):
         conn.close()
 
 
+def inserisci_pvtotaluptd_bulk(righe: list[dict], progress_callback=None):
+    """
+    Inserisce tutte le righe del file pvtotaluptd in un'unica transazione.
+    Svuota la tabella prima del caricamento.
+    righe: lista di dict {colonna: valore} già convertiti in tipi Python nativi.
+    progress_callback(current, total): chiamato dopo ogni batch.
+    """
+    if not righe:
+        return
+
+    colonne = list(righe[0].keys())
+    colonne_sql = ", ".join(f'"{c}"' for c in colonne)
+    placeholders = ", ".join(["?"] * len(colonne))
+    sql = f"INSERT INTO pvtotaluptd ({colonne_sql}) VALUES ({placeholders})"
+
+    valori = [tuple(r[c] for c in colonne) for r in righe]
+    totale = len(valori)
+    BATCH = 100
+
+    conn = get_connection()
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("DELETE FROM pvtotaluptd")  # svuota la tabella prima del caricamento
+        for i in range(0, totale, BATCH):
+            conn.executemany(sql, valori[i : i + BATCH])
+            if progress_callback:
+                progress_callback(min(i + BATCH, totale), totale)
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def init_db():
     """Crea il database e le tabelle se non esistono."""
     conn = get_connection()
@@ -126,6 +158,60 @@ def init_db():
             "User Phone 1" TEXT,
             "User Phone 2" TEXT,
             "Work Location" TEXT
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS pvtotaluptd (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            "Resource Name" TEXT,
+            "Start Date" TEXT,
+            "Term Date" TEXT,
+            "User Name" TEXT,
+            "User Role" TEXT,
+            "Organizational Resource" TEXT,
+            "Calendar" TEXT,
+            "Hours Per Week" REAL,
+            "Activity Type" TEXT,
+            "Competence (Concatenated List)" TEXT,
+            "Competence (Primary Value)" TEXT,
+            "Competence 2" TEXT,
+            "Cost Centers" TEXT,
+            "Direct Supervisor Name" TEXT,
+            "Direct Supervisor Name 2" TEXT,
+            "Disapproved Timesheets" TEXT,
+            "Email Notifications Enabled" TEXT,
+            "Job Location Country" TEXT,
+            "Job Location Region" TEXT,
+            "Legal Entity" TEXT,
+            "Network Authentication Name" TEXT,
+            "Organization (OBS)" TEXT,
+            "Overdue Timesheets" INTEGER,
+            "Parameters" TEXT,
+            "Providing Org." TEXT,
+            "RES Organization" TEXT,
+            "RES Seniority" TEXT,
+            "Resource Comments" TEXT,
+            "Resource Depth" TEXT,
+            "Resource Quantity" TEXT,
+            "Resource Types" TEXT,
+            "Short Name" TEXT,
+            "Skill (Concatenated List)" TEXT,
+            "Skill (Primary Value)" TEXT,
+            "Sub Org (OBS)" TEXT,
+            "Team (OBS)" TEXT,
+            "Teams (Concatenated List)" TEXT,
+            "Teams (Primary Value)" TEXT,
+            "Timesheets Submitted" INTEGER,
+            "Timesheets To Approve" INTEGER,
+            "User E-Mail Address" TEXT,
+            "User Pager" TEXT,
+            "User Phone 1" TEXT,
+            "User Phone 2" TEXT,
+            "Work Location" TEXT,
+            "Date" TEXT
         )
         """
     )

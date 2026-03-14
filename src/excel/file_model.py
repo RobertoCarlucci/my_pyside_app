@@ -17,8 +17,16 @@ class FileModel:
         if not os.path.exists(path):
             return None
 
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError as e:
+            raise ValueError(
+                f"Errore nel file di configurazione {codice_file}.json:\n"
+                f"Riga {e.lineno}, Colonna {e.colno}: {e.msg}"
+            ) from e
+        except Exception as e:
+            raise ValueError(f"Errore nel caricamento del modello {codice_file}: {e}") from e
 
     @classmethod
     def get_colonne_attese(cls, codice_file: str):
@@ -40,7 +48,7 @@ class FileModel:
         if not colonne_attese:
             return False, df
 
-        ok, df_validato, _ = ExcelValidator.valida(df, colonne_attese)
+        ok, df_validato, _, _ = ExcelValidator.valida(df, colonne_attese)
         return ok, df_validato
 
     @classmethod

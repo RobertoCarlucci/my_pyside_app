@@ -62,5 +62,53 @@
         "righe": 1689,
         "esito": "OK",
         "errori": []
+    },
+    {
+        "timestamp": "2026-03-14 18:35:33",
+        "file_path": "C:/Users/roby/Desktop/Datalogic/Databases/ControlloSituazioneTimesheet/INPUT/RES10.xlsx",
+        "codice": "res10",
+        "righe": 1628,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-14 19:15:44",
+        "file_path": "C:/Users/roby/Desktop/Datalogic/Databases/UpdtPvPMO/PV_Total_Uptd.xlsx",
+        "codice": "pvtotaluptd",
+        "righe": 1628,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-14 19:16:41",
+        "file_path": "C:/Users/roby/Desktop/Datalogic/Databases/UpdtPvPMO/GlobalTimesheetExtract_Uptd.xlsx",
+        "codice": "globaltimesheetextractuptd",
+        "righe": 60696,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-14 19:16:55",
+        "file_path": "C:/Users/roby/Desktop/Datalogic/Databases/UpdtPvPMO/Portfolio Manager - All Projects mapped.xlsx",
+        "codice": "portfoliomanagerallprojectsmapped",
+        "righe": 1385,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-14 19:17:08",
+        "file_path": "C:/Users/roby/Desktop/Datalogic/Databases/UpdtPvPMO/TimesheetInformationByMonth_Updt.xlsx",
+        "codice": "timesheetinformationbymonthupdt",
+        "righe": 45702,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-14 19:23:34",
+        "file_path": "C:/Users/roby/Desktop/Datalogic/Databases/UpdtPvPMO/Portfolio Manager - All Projects mapped.xlsx",
+        "codice": "portfoliomanagerallprojectsmapped",
+        "righe": 1385,
+        "esito": "OK",
+        "errori": []
     }
 ]
