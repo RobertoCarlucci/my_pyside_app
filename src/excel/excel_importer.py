@@ -11,12 +11,14 @@ def _to_sqlite(val):
     - Int64 → int
     - Resto → valore nativo
     """
-    # Gestisci Timestamp (datetime) → ISO string
+    # Gestisci Timestamp (datetime) → formato SQL standard (compatibile con MariaDB DATE/DATETIME)
     if isinstance(val, pd.Timestamp):
         if pd.isnull(val):
             return None
-        # Ritorna ISO format string (YYYY-MM-DD HH:MM:SS)
-        return val.isoformat()
+        # Se ha componente oraria significativa → DATETIME, altrimenti → DATE
+        if val.hour == 0 and val.minute == 0 and val.second == 0:
+            return val.strftime("%Y-%m-%d")
+        return val.strftime("%Y-%m-%d %H:%M:%S")
 
     # Gestisci NaT (Not-a-Time)
     if pd.isna(val):
