@@ -1,9 +1,40 @@
 import sqlite3
 import os
+import json
+import glob
 
-# Percorso del file DB (nella cartella principale del progetto)
+# Percorso del file DB (nella cartella src del progetto)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "app.db")
+
+MODELS_DIR = os.path.join(BASE_DIR, "excel", "models")
+
+# Mapping tipi JSON/Python → tipi SQLite
+_TIPO_MAP = {
+    "string": "TEXT",
+    "str":    "TEXT",
+    "text":   "TEXT",
+    "int":    "INTEGER",
+    "integer":"INTEGER",
+    "float":  "REAL",
+    "real":   "REAL",
+    "date":   "TEXT",
+    "datetime":"TEXT",
+}
+
+
+def _tipo_sqlite(tipo: str) -> str:
+    """Converte un tipo JSON/Python nel corrispondente tipo SQLite."""
+    return _TIPO_MAP.get(tipo.lower(), "TEXT")
+
+
+def _carica_modelli() -> list[dict]:
+    """Carica tutti i modelli JSON dalla cartella models."""
+    modelli = []
+    for path in glob.glob(os.path.join(MODELS_DIR, "*.json")):
+        with open(path, encoding="utf-8") as f:
+            modelli.append(json.load(f))
+    return modelli
 
 
 def get_connection():
@@ -11,61 +42,22 @@ def get_connection():
     return sqlite3.connect(DB_PATH)
 
 
-def inserisci_res10_record(**kwargs):
-    """
-    Inserisce una riga del file res10 nel DB.
-    kwargs contiene: colonna=valore
-    """
-    conn = get_connection()
-    cur = conn.cursor()
-
-    # I nomi di colonna vanno quotati perché contengono spazi e caratteri speciali
-    colonne = ", ".join(f'"{col}"' for col in kwargs.keys())
+def inserisci_record(tabella: str, **kwargs):
+    """Inserisce una singola riga nella tabella specificata."""
+    colonne_sql = ", ".join(f'"{c}"' for c in kwargs.keys())
     placeholders = ", ".join(["?"] * len(kwargs))
-    valori = list(kwargs.values())
-
-    sql = f"INSERT INTO res10 ({colonne}) VALUES ({placeholders})"
-    cur.execute(sql, valori)
-
-    conn.commit()
-    conn.close()
-
-
-def inserisci_res10_bulk(righe: list[dict], progress_callback=None):
-    """
-    Inserisce tutte le righe del file res10 in un'unica transazione.
-    Svuota la tabella prima del caricamento.
-    righe: lista di dict {colonna: valore} già convertiti in tipi Python nativi.
-    progress_callback(current, total): chiamato dopo ogni batch.
-    """
-    if not righe:
-        return
-
-    colonne = list(righe[0].keys())
-    colonne_sql = ", ".join(f'"{c}"' for c in colonne)
-    placeholders = ", ".join(["?"] * len(colonne))
-    sql = f"INSERT INTO res10 ({colonne_sql}) VALUES ({placeholders})"
-
-    valori = [tuple(r[c] for c in colonne) for r in righe]
-    totale = len(valori)
-    BATCH = 100
-
+    sql = f'INSERT INTO "{tabella}" ({colonne_sql}) VALUES ({placeholders})'
     conn = get_connection()
     try:
-        conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("DELETE FROM res10")  # svuota la tabella prima del caricamento
-        for i in range(0, totale, BATCH):
-            conn.executemany(sql, valori[i : i + BATCH])
-            if progress_callback:
-                progress_callback(min(i + BATCH, totale), totale)
+        conn.execute(sql, list(kwargs.values()))
         conn.commit()
     finally:
         conn.close()
 
 
-def inserisci_pvtotaluptd_bulk(righe: list[dict], progress_callback=None):
+def inserisci_bulk(tabella: str, righe: list[dict], progress_callback=None):
     """
-    Inserisce tutte le righe del file pvtotaluptd in un'unica transazione.
+    Inserisce tutte le righe nella tabella specificata in un'unica transazione.
     Svuota la tabella prima del caricamento.
     righe: lista di dict {colonna: valore} già convertiti in tipi Python nativi.
     progress_callback(current, total): chiamato dopo ogni batch.
@@ -76,7 +68,7 @@ def inserisci_pvtotaluptd_bulk(righe: list[dict], progress_callback=None):
     colonne = list(righe[0].keys())
     colonne_sql = ", ".join(f'"{c}"' for c in colonne)
     placeholders = ", ".join(["?"] * len(colonne))
-    sql = f"INSERT INTO pvtotaluptd ({colonne_sql}) VALUES ({placeholders})"
+    sql = f'INSERT INTO "{tabella}" ({colonne_sql}) VALUES ({placeholders})'
 
     valori = [tuple(r[c] for c in colonne) for r in righe]
     totale = len(valori)
@@ -85,7 +77,7 @@ def inserisci_pvtotaluptd_bulk(righe: list[dict], progress_callback=None):
     conn = get_connection()
     try:
         conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("DELETE FROM pvtotaluptd")  # svuota la tabella prima del caricamento
+        conn.execute(f'DELETE FROM "{tabella}"')
         for i in range(0, totale, BATCH):
             conn.executemany(sql, valori[i : i + BATCH])
             if progress_callback:
@@ -96,10 +88,11 @@ def inserisci_pvtotaluptd_bulk(righe: list[dict], progress_callback=None):
 
 
 def init_db():
-    """Crea il database e le tabelle se non esistono."""
+    """Crea il database e le tabelle se non esistono, leggendo i modelli JSON."""
     conn = get_connection()
     cursor = conn.cursor()
 
+    # Tabella utenti (non legata a un modello JSON)
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS utenti (
@@ -109,112 +102,20 @@ def init_db():
         """
     )
 
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS res10 (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            "Resource Name" TEXT,
-            "Start Date" TEXT,
-            "Term Date" TEXT,
-            "User Name" TEXT,
-            "User Role" TEXT,
-            "Organizational Resource" TEXT,
-            "Calendar" TEXT,
-            "Hours Per Week" REAL,
-            "Activity Type" TEXT,
-            "Competence (Concatenated List)" TEXT,
-            "Competence (Primary Value)" TEXT,
-            "Competence 2" TEXT,
-            "Cost Centers" TEXT,
-            "Direct Supervisor Name" TEXT,
-            "Direct Supervisor Name 2" TEXT,
-            "Disapproved Timesheets" TEXT,
-            "Email Notifications Enabled" TEXT,
-            "Job Location Country" TEXT,
-            "Job Location Region" TEXT,
-            "Legal Entity" TEXT,
-            "Network Authentication Name" TEXT,
-            "Organization (OBS)" TEXT,
-            "Overdue Timesheets" INTEGER,
-            "Parameters" TEXT,
-            "Providing Org." TEXT,
-            "RES Organization" TEXT,
-            "RES Seniority" TEXT,
-            "Resource Comments" TEXT,
-            "Resource Depth" TEXT,
-            "Resource Quantity" TEXT,
-            "Resource Types" TEXT,
-            "Short Name" TEXT,
-            "Skill (Concatenated List)" TEXT,
-            "Skill (Primary Value)" TEXT,
-            "Sub Org (OBS)" TEXT,
-            "Team (OBS)" TEXT,
-            "Teams (Concatenated List)" TEXT,
-            "Teams (Primary Value)" TEXT,
-            "Timesheets Submitted" INTEGER,
-            "Timesheets To Approve" INTEGER,
-            "User E-Mail Address" TEXT,
-            "User Pager" TEXT,
-            "User Phone 1" TEXT,
-            "User Phone 2" TEXT,
-            "Work Location" TEXT
+    # Tabelle dei modelli Excel: struttura letta dai JSON
+    for modello in _carica_modelli():
+        tabella = modello["codice"]
+        col_defs = [
+            f'    "{col}" {_tipo_sqlite(tipo)}'
+            for col, tipo in modello["tipi_colonne"].items()
+        ]
+        sql = (
+            f'CREATE TABLE IF NOT EXISTS "{tabella}" (\n'
+            f'    id INTEGER PRIMARY KEY AUTOINCREMENT,\n'
+            + ",\n".join(col_defs)
+            + "\n)"
         )
-        """
-    )
-
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS pvtotaluptd (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            "Resource Name" TEXT,
-            "Start Date" TEXT,
-            "Term Date" TEXT,
-            "User Name" TEXT,
-            "User Role" TEXT,
-            "Organizational Resource" TEXT,
-            "Calendar" TEXT,
-            "Hours Per Week" REAL,
-            "Activity Type" TEXT,
-            "Competence (Concatenated List)" TEXT,
-            "Competence (Primary Value)" TEXT,
-            "Competence 2" TEXT,
-            "Cost Centers" TEXT,
-            "Direct Supervisor Name" TEXT,
-            "Direct Supervisor Name 2" TEXT,
-            "Disapproved Timesheets" TEXT,
-            "Email Notifications Enabled" TEXT,
-            "Job Location Country" TEXT,
-            "Job Location Region" TEXT,
-            "Legal Entity" TEXT,
-            "Network Authentication Name" TEXT,
-            "Organization (OBS)" TEXT,
-            "Overdue Timesheets" INTEGER,
-            "Parameters" TEXT,
-            "Providing Org." TEXT,
-            "RES Organization" TEXT,
-            "RES Seniority" TEXT,
-            "Resource Comments" TEXT,
-            "Resource Depth" TEXT,
-            "Resource Quantity" TEXT,
-            "Resource Types" TEXT,
-            "Short Name" TEXT,
-            "Skill (Concatenated List)" TEXT,
-            "Skill (Primary Value)" TEXT,
-            "Sub Org (OBS)" TEXT,
-            "Team (OBS)" TEXT,
-            "Teams (Concatenated List)" TEXT,
-            "Teams (Primary Value)" TEXT,
-            "Timesheets Submitted" INTEGER,
-            "Timesheets To Approve" INTEGER,
-            "User E-Mail Address" TEXT,
-            "User Pager" TEXT,
-            "User Phone 1" TEXT,
-            "User Phone 2" TEXT,
-            "Work Location" TEXT,
-            "Date" TEXT
-        )
-        """
-    )
+        cursor.execute(sql)
 
     conn.commit()
     conn.close()
@@ -222,25 +123,14 @@ def init_db():
 
 def inserisci_utente(nome: str):
     """Inserisce un utente nella tabella utenti."""
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "INSERT INTO utenti (nome) VALUES (?)",
-        (nome,),
-    )
-
-    conn.commit()
-    conn.close()
+    inserisci_record("utenti", nome=nome)
 
 
 def lista_utenti():
     """Ritorna la lista di tutti gli utenti (id, nome)."""
     conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute("SELECT id, nome FROM utenti")
     rows = cursor.fetchall()
-
     conn.close()
     return rows

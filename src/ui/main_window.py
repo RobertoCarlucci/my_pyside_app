@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 
-from db.database import init_db, inserisci_utente, lista_utenti
+from db.database import inserisci_utente, lista_utenti
 from controllers.main_excel import MainExcel
 
 # IMPORTA I MODULI DI STILE
@@ -13,8 +13,6 @@ from ui.style.button_styles import apply_button_style
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-
-        init_db()
 
         self.setWindowTitle("Gestione Excel")
         self._bg_label = (

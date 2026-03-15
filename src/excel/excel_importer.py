@@ -1,6 +1,6 @@
 import pandas as pd
 
-from db.database import inserisci_res10_bulk, inserisci_pvtotaluptd_bulk
+from db.database import inserisci_bulk
 
 
 def _to_sqlite(val):
@@ -32,9 +32,9 @@ def _to_sqlite(val):
 class ExcelImporter:
 
     @staticmethod
-    def importa_res10(df, progress_callback=None):
+    def importa(codice: str, df, progress_callback=None):
         """
-        Importa i dati del file res10 nel DB in un'unica transazione.
+        Importa i dati del DataFrame nel DB nella tabella corrispondente al codice.
         df = DataFrame validato e mappato
         progress_callback(current, total): opzionale, per aggiornare la UI.
         """
@@ -42,17 +42,4 @@ class ExcelImporter:
             {col: _to_sqlite(val) for col, val in row.items()}
             for _, row in df.iterrows()
         ]
-        inserisci_res10_bulk(righe, progress_callback)
-
-    @staticmethod
-    def importa_pvtotaluptd(df, progress_callback=None):
-        """
-        Importa i dati del file pvtotaluptd nel DB in un'unica transazione.
-        df = DataFrame validato e mappato
-        progress_callback(current, total): opzionale, per aggiornare la UI.
-        """
-        righe = [
-            {col: _to_sqlite(val) for col, val in row.items()}
-            for _, row in df.iterrows()
-        ]
-        inserisci_pvtotaluptd_bulk(righe, progress_callback)
+        inserisci_bulk(codice, righe, progress_callback)

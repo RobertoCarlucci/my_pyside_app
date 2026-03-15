@@ -104,13 +104,8 @@ class MainExcel:
                 progress.setValue(current)
                 QApplication.processEvents()
 
-            # IMPORTAZIONE SPECIFICA PER IL FILE
-            if codice == "res10":
-                ExcelImporter.importa_res10(df_validato, on_progress)
-            elif codice == "pvtotaluptd":
-                ExcelImporter.importa_pvtotaluptd(df_validato, on_progress)
-            # elif codice == "res20":
-            #     ExcelImporter.importa_res20(df_validato, on_progress)
+            # IMPORTAZIONE NELLA TABELLA CORRISPONDENTE AL CODICE
+            ExcelImporter.importa(codice, df_validato, on_progress)
 
             progress.setValue(totale)
             progress.close()
