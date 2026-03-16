@@ -93,7 +93,7 @@ class MainExcel:
                 "Salvataggio in corso...", "", 0, totale, self.ui
             )
             progress.setCancelButton(None)
-            progress.setWindowTitle("Importazione RES10")
+            progress.setWindowTitle(f"Importazione {codice.upper()}")
             progress.setWindowModality(Qt.WindowModality.WindowModal)
             progress.setMinimumDuration(0)
             progress.setValue(0)
@@ -104,11 +104,7 @@ class MainExcel:
                 progress.setValue(current)
                 QApplication.processEvents()
 
-            # IMPORTAZIONE SPECIFICA PER IL FILE
-            if codice == "res10":
-                ExcelImporter.importa_res10(df_validato, on_progress)
-            # elif codice == "res20":
-            #     ExcelImporter.importa_res20(df_validato, on_progress)
+            ExcelImporter.importa(codice, df_validato, on_progress)
 
             progress.setValue(totale)
             progress.close()

@@ -10,11 +10,11 @@
         "Date"
     ],
     "tipi_colonne": {
-        "Short Name": "string",
-        "Screened Disapproved": "int",
-        "Screened Overdue": "int",
-        "Screened Submitted": "int",
-        "Screened To Approve": "int",
-        "Date": "date"
+        "Short Name": "TEXT",
+        "Screened Disapproved": "INTEGER",
+        "Screened Overdue": "INTEGER",
+        "Screened Submitted": "INTEGER",
+        "Screened To Approve": "INTEGER",
+        "Date": "TEXT"
     }
 }
