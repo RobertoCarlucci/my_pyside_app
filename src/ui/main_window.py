@@ -3,7 +3,6 @@ from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 
 from db.database import init_db, inserisci_utente, lista_utenti
-from excel.file_model import FileModel
 from controllers.main_excel import MainExcel
 
 # IMPORTA I MODULI DI STILE
@@ -16,9 +15,6 @@ class MainWindow(QWidget):
         super().__init__()
 
         init_db()
-        # Crea le tabelle per tutti i modelli Excel definiti in JSON
-        # modelli = [FileModel.load_model(c) for c in FileModel.get_all_models()]
-        # crea_tabelle_modelli([m for m in modelli if m])
 
         self.setWindowTitle("Gestione Excel")
         self._bg_label = (
