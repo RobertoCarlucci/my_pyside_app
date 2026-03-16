@@ -51,8 +51,8 @@
     ],
     "tipi_colonne": {
         "Resource Name": "TEXT",
-        "Start Date": "TEXT",
-        "Term Date": "TEXT",
+        "Start Date": "DATE",
+        "Term Date": "DATE",
         "User Name": "TEXT",
         "User Role": "TEXT",
         "Organizational Resource": "TEXT",
@@ -95,6 +95,6 @@
         "User Phone 1": "TEXT",
         "User Phone 2": "TEXT",
         "Work Location": "TEXT",
-        "Date": "TEXT"
+        "Date": "DATE"
     }
 }

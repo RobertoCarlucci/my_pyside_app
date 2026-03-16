@@ -10,13 +10,15 @@ _MODELS_DIR = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "excel", "models")
 )
 
-# Mapping tipi JSON  SQLite
+# Mapping tipi JSON → SQL (compatibile SQLite e MariaDB)
+# SQLite accetta DATE/DATETIME come alias di TEXT affinity;
+# MariaDB li riconosce come tipi nativi.
 _TIPO_SQL: dict[str, str] = {
     "string": "TEXT",
     "str": "TEXT",
     "text": "TEXT",
-    "date": "TEXT",
-    "datetime": "TEXT",
+    "date": "DATE",
+    "datetime": "DATETIME",
     "float": "REAL",
     "real": "REAL",
     "int": "INTEGER",
@@ -82,14 +84,32 @@ def crea_tabelle_modelli(modelli: list[dict]):
             if not tabella or not colonne:
                 continue
             cols_sql = ",\n    ".join(
-                f'"{c}" {_TIPO_SQL.get(tipi.get(c, "string"), "TEXT")}'
-                for c in colonne
+                f'"{c}" {_TIPO_SQL.get(tipi.get(c, "string"), "TEXT")}' for c in colonne
             )
             conn.execute(
                 f'CREATE TABLE IF NOT EXISTS "{tabella}" (\n'
                 f"    id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                 f"    {cols_sql}\n)"
             )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def inserisci_record(tabella: str, **kwargs):
+    """
+    Inserisce un singolo record nella tabella indicata.
+    Crea la tabella se non esiste (legge il modello JSON corrispondente).
+    kwargs: colonna=valore già convertiti in tipi Python nativi.
+    """
+    colonne_sql = ", ".join(f'"{c}"' for c in kwargs)
+    placeholders = ", ".join(["?"] * len(kwargs))
+    sql = f'INSERT INTO "{tabella}" ({colonne_sql}) VALUES ({placeholders})'
+
+    conn = get_connection()
+    try:
+        _crea_tabella_se_assente(conn, tabella)
+        conn.execute(sql, list(kwargs.values()))
         conn.commit()
     finally:
         conn.close()

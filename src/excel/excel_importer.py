@@ -3,8 +3,8 @@ import pandas as pd
 from db.database import importa_bulk
 
 
-def _to_sqlite(val):
-    """Converte un valore pandas in un tipo nativo Python compatibile con sqlite3."""
+def _to_db(val):
+    """Converte un valore pandas in un tipo nativo Python compatibile con SQLite e MariaDB."""
     # pd.Timestamp → datetime.date nativo (SQLite lo gestisce direttamente)
     if isinstance(val, pd.Timestamp):
         if pd.isnull(val):
@@ -38,7 +38,6 @@ class ExcelImporter:
         progress_callback(current, total): opzionale, per aggiornare la UI.
         """
         righe = [
-            {col: _to_sqlite(val) for col, val in row.items()}
-            for _, row in df.iterrows()
+            {col: _to_db(val) for col, val in row.items()} for _, row in df.iterrows()
         ]
         importa_bulk(codice, righe, progress_callback)

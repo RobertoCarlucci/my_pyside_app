@@ -80,7 +80,7 @@
         "Work_Category": "TEXT",
         "Activity_Type_Name": "TEXT",
         "Activity_Type_SeqID": "TEXT",
-        "Timesheet_Date": "TEXT",
+        "Timesheet_Date": "DATE",
         "Timesheet_Day": "INTEGER",
         "Timesheet_Month": "INTEGER",
         "Timesheet_Quarter": "TEXT",

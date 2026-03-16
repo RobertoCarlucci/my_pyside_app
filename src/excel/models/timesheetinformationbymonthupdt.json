@@ -15,6 +15,6 @@
         "Screened Overdue": "INTEGER",
         "Screened Submitted": "INTEGER",
         "Screened To Approve": "INTEGER",
-        "Date": "TEXT"
+        "Date": "DATE"
     }
 }
