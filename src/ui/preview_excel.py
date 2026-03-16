@@ -25,7 +25,7 @@ class PreviewExcel(QDialog):
 
         # Titolo
         titolo = QLabel("Controlla i dati e conferma l'importazione")
-        titolo.setAlignment(Qt.AlignCenter)
+        titolo.setAlignment(Qt.AlignmentFlag.AlignCenter)
         titolo.setStyleSheet("font-size: 16px; font-weight: bold;")
         layout.addWidget(titolo)
 

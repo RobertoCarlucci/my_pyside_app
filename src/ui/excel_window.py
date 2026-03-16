@@ -55,6 +55,13 @@ class ExcelWindow(QWidget):
         self.btn_importa.clicked.connect(self.excel.start_import)
         grid.addWidget(self.btn_importa, 0, 0)
 
+        # --- (0,1) Pulsante nuova importazione (abilitato solo a fine ciclo) ---
+        self.btn_nuova = QPushButton("🔄  Nuova Importazione")
+        apply_button_style(self.btn_nuova, "secondary")
+        self.btn_nuova.setEnabled(False)
+        self.btn_nuova.clicked.connect(self._nuova_importazione)
+        grid.addWidget(self.btn_nuova, 0, 1)
+
         # --- (1, 0:3) Label di stato ---
         self.label = QLabel("")
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -88,6 +95,13 @@ class ExcelWindow(QWidget):
     # ------------------------------------------------------------------
     # Azioni pulsanti
     # ------------------------------------------------------------------
+    def _nuova_importazione(self):
+        """Resetta la UI e riabilita il pulsante principale per un nuovo ciclo."""
+        self.btn_nuova.setEnabled(False)
+        self.btn_importa.setEnabled(True)
+        self.label.setText("")
+        self.progress_bar.setValue(0)
+
     def _torna_al_menu(self):
         self.close()
 

@@ -62,5 +62,10 @@ def apply_button_style(button: QPushButton, style_name: str):
         QPushButton:hover {{
             background-color: {s['hover']};
         }}
+        QPushButton:disabled {{
+            background-color: #2A2A2A;
+            color: #606060;
+            border: 1px solid #3D3D3D;
+        }}
     """
     )

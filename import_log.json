@@ -126,5 +126,93 @@
         "righe": 1686,
         "esito": "OK",
         "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 15:33:24",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/ControlloSituazioneTimesheet/INPUT/RES10.xlsx",
+        "codice": "res10",
+        "righe": 1686,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 15:43:34",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/GlobalTimesheetExtract_Uptd.xlsx",
+        "codice": "globaltimesheetextractuptd",
+        "righe": 43578,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 15:43:34",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/GlobalTimesheetExtract_Uptd.xlsx",
+        "codice": "globaltimesheetextractuptd",
+        "righe": 43578,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 15:45:50",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/GlobalTimesheetExtract_Uptd.xlsx",
+        "codice": "globaltimesheetextractuptd",
+        "righe": 43578,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 15:45:50",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/GlobalTimesheetExtract_Uptd.xlsx",
+        "codice": "globaltimesheetextractuptd",
+        "righe": 43578,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 15:57:15",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/ControlloSituazioneTimesheet/INPUT/RES10.xlsx",
+        "codice": "res10",
+        "righe": 1686,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 15:57:15",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/ControlloSituazioneTimesheet/INPUT/RES10.xlsx",
+        "codice": "res10",
+        "righe": 1686,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 16:06:27",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/GlobalTimesheetExtract_Uptd.xlsx",
+        "codice": "globaltimesheetextractuptd",
+        "righe": 43578,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 16:06:27",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/GlobalTimesheetExtract_Uptd.xlsx",
+        "codice": "globaltimesheetextractuptd",
+        "righe": 43578,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 16:10:41",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/PV_Total_Uptd.xlsx",
+        "codice": "pvtotaluptd",
+        "righe": 1663,
+        "esito": "OK",
+        "errori": []
+    },
+    {
+        "timestamp": "2026-03-16 16:10:41",
+        "file_path": "C:/Users/rcarlucci/OneDrive - Datalogic S.p.a/PMO - Lib_PMO/Team Areas/Portfolio Management/Team/Power_Bi/Databases/UpdtPvPMO/PV_Total_Uptd.xlsx",
+        "codice": "pvtotaluptd",
+        "righe": 1663,
+        "esito": "OK",
+        "errori": []
     }
 ]
