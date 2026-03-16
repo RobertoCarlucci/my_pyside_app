@@ -7,6 +7,14 @@ BUTTON_STYLES = {
         "radius": 6,
         "padding": "8px 16px",
     },
+    "secondary": {
+        "bg": "#6C757D",
+        "fg": "white",
+        "hover": "#545B62",
+        "font_size": 14,
+        "radius": 6,
+        "padding": "8px 16px",
+    },
     "danger": {
         "bg": "#D83B01",
         "fg": "white",
