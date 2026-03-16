@@ -1,54 +1,27 @@
 import sqlite3
 import os
-import json
-import glob
 
-# Percorso del file DB (nella cartella src del progetto)
+# Percorso del file DB (nella cartella principale del progetto)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "app.db")
 
 # Percorso cartella modelli JSON (relativo a questo file)
-_MODELS_DIR = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "excel", "models"
+_MODELS_DIR = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "excel", "models")
 )
 
-# Mapping tipi JSON → SQLite
+# Mapping tipi JSON  SQLite
 _TIPO_SQL: dict[str, str] = {
     "string": "TEXT",
     "str": "TEXT",
-    "date": "TEXT",
-    "float": "REAL",
-    "int": "INTEGER",
-}
-
-MODELS_DIR = os.path.join(BASE_DIR, "excel", "models")
-
-# Mapping tipi JSON/Python → tipi SQLite
-_TIPO_MAP = {
-    "string": "TEXT",
-    "str": "TEXT",
     "text": "TEXT",
-    "int": "INTEGER",
-    "integer": "INTEGER",
-    "float": "REAL",
-    "real": "REAL",
     "date": "TEXT",
     "datetime": "TEXT",
+    "float": "REAL",
+    "real": "REAL",
+    "int": "INTEGER",
+    "integer": "INTEGER",
 }
-
-
-def _tipo_sqlite(tipo: str) -> str:
-    """Converte un tipo JSON/Python nel corrispondente tipo SQLite."""
-    return _TIPO_MAP.get(tipo.lower(), "TEXT")
-
-
-def _carica_modelli() -> list[dict]:
-    """Carica tutti i modelli JSON dalla cartella models."""
-    modelli = []
-    for path in glob.glob(os.path.join(MODELS_DIR, "*.json")):
-        with open(path, encoding="utf-8") as f:
-            modelli.append(json.load(f))
-    return modelli
 
 
 def get_connection():
@@ -56,31 +29,78 @@ def get_connection():
     return sqlite3.connect(DB_PATH)
 
 
-def inserisci_res10_record(**kwargs):
+def _crea_tabella_se_assente(conn: sqlite3.Connection, tabella: str):
     """
-    Inserisce una riga del file res10 nel DB.
-    kwargs contiene: colonna=valore
+    Verifica se la tabella esiste nel DB; se non esiste la crea leggendo
+    la struttura dal file JSON corrispondente nella cartella models/.
+    Solleva FileNotFoundError se il modello JSON non e` trovato.
+    Solleva ValueError se il JSON non contiene le chiavi attese.
+    """
+    cur = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?", (tabella,)
+    )
+    if cur.fetchone() is not None:
+        return  # tabella gia` presente
+
+    import json
+
+    model_path = os.path.join(_MODELS_DIR, f"{tabella}.json")
+    if not os.path.isfile(model_path):
+        raise FileNotFoundError(
+            f"Modello JSON non trovato per la tabella '{tabella}': {model_path}"
+        )
+
+    with open(model_path, encoding="utf-8") as f:
+        modello = json.load(f)
+
+    colonne = modello.get("colonne_attese", [])
+    tipi = modello.get("tipi_colonne", {})
+    if not colonne:
+        raise ValueError(f"Il modello '{tabella}' non contiene 'colonne_attese'.")
+
+    cols_sql = ",\n    ".join(
+        f'"{c}" {_TIPO_SQL.get(tipi.get(c, "string"), "TEXT")}' for c in colonne
+    )
+    conn.execute(
+        f'CREATE TABLE IF NOT EXISTS "{tabella}" (\n'
+        f"    id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+        f"    {cols_sql}\n)"
+    )
+
+
+def crea_tabelle_modelli(modelli: list[dict]):
+    """
+    Crea (se non esistono) le tabelle per tutti i modelli Excel.
+    modelli: lista di dict caricati dai file JSON (chiavi: codice, colonne_attese, tipi_colonne).
     """
     conn = get_connection()
-    cur = conn.cursor()
+    try:
+        for modello in modelli:
+            tabella = modello.get("codice")
+            colonne = modello.get("colonne_attese", [])
+            tipi = modello.get("tipi_colonne", {})
+            if not tabella or not colonne:
+                continue
+            cols_sql = ",\n    ".join(
+                f'"{c}" {_TIPO_SQL.get(tipi.get(c, "string"), "TEXT")}'
+                for c in colonne
+            )
+            conn.execute(
+                f'CREATE TABLE IF NOT EXISTS "{tabella}" (\n'
+                f"    id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
+                f"    {cols_sql}\n)"
+            )
+        conn.commit()
+    finally:
+        conn.close()
 
-    # I nomi di colonna vanno quotati perché contengono spazi e caratteri speciali
-    colonne = ", ".join(f'"{col}"' for col in kwargs.keys())
-    placeholders = ", ".join(["?"] * len(kwargs))
-    valori = list(kwargs.values())
 
-    sql = f"INSERT INTO res10 ({colonne}) VALUES ({placeholders})"
-    cur.execute(sql, valori)
-
-    conn.commit()
-    conn.close()
-
-
-def inserisci_res10_bulk(righe: list[dict], progress_callback=None):
+def importa_bulk(tabella: str, righe: list[dict], progress_callback=None):
     """
-    Inserisce tutte le righe del file res10 in un'unica transazione.
-    Svuota la tabella prima del caricamento.
-    righe: lista di dict {colonna: valore} già convertiti in tipi Python nativi.
+    Svuota la tabella e inserisce tutte le righe in un'unica transazione.
+    Se la tabella non esiste la crea leggendo il modello JSON corrispondente.
+    tabella: nome della tabella SQLite (coincide con il codice del modello JSON).
+    righe: lista di dict {colonna: valore} gia` convertiti in tipi Python nativi.
     progress_callback(current, total): chiamato dopo ogni batch di 100 righe.
     """
     if not righe:
@@ -98,7 +118,8 @@ def inserisci_res10_bulk(righe: list[dict], progress_callback=None):
     conn = get_connection()
     try:
         conn.execute("PRAGMA journal_mode=WAL")
-        conn.execute("DELETE FROM res10")  # svuota la tabella prima del caricamento
+        _crea_tabella_se_assente(conn, tabella)  # crea se non esiste
+        conn.execute(f'DELETE FROM "{tabella}"')  # svuota prima del caricamento
         for i in range(0, totale, BATCH):
             conn.executemany(sql, valori[i : i + BATCH])
             if progress_callback:
@@ -109,10 +130,9 @@ def inserisci_res10_bulk(righe: list[dict], progress_callback=None):
 
 
 def init_db():
-    """Crea il database e le tabelle se non esistono."""
+    """Crea il database e la tabella utenti se non esiste."""
     conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS utenti (
@@ -121,60 +141,6 @@ def init_db():
         )
         """
     )
-
-    cursor.execute(
-        """
-        CREATE TABLE IF NOT EXISTS res10 (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            "Resource Name" TEXT,
-            "Start Date" TEXT,
-            "Term Date" TEXT,
-            "User Name" TEXT,
-            "User Role" TEXT,
-            "Organizational Resource" TEXT,
-            "Calendar" TEXT,
-            "Hours Per Week" REAL,
-            "Activity Type" TEXT,
-            "Competence (Concatenated List)" TEXT,
-            "Competence (Primary Value)" TEXT,
-            "Competence 2" TEXT,
-            "Cost Centers" TEXT,
-            "Direct Supervisor Name" TEXT,
-            "Direct Supervisor Name 2" TEXT,
-            "Disapproved Timesheets" TEXT,
-            "Email Notifications Enabled" TEXT,
-            "Job Location Country" TEXT,
-            "Job Location Region" TEXT,
-            "Legal Entity" TEXT,
-            "Network Authentication Name" TEXT,
-            "Organization (OBS)" TEXT,
-            "Overdue Timesheets" INTEGER,
-            "Parameters" TEXT,
-            "Providing Org." TEXT,
-            "RES Organization" TEXT,
-            "RES Seniority" TEXT,
-            "Resource Comments" TEXT,
-            "Resource Depth" TEXT,
-            "Resource Quantity" TEXT,
-            "Resource Types" TEXT,
-            "Short Name" TEXT,
-            "Skill (Concatenated List)" TEXT,
-            "Skill (Primary Value)" TEXT,
-            "Sub Org (OBS)" TEXT,
-            "Team (OBS)" TEXT,
-            "Teams (Concatenated List)" TEXT,
-            "Teams (Primary Value)" TEXT,
-            "Timesheets Submitted" INTEGER,
-            "Timesheets To Approve" INTEGER,
-            "User E-Mail Address" TEXT,
-            "User Pager" TEXT,
-            "User Phone 1" TEXT,
-            "User Phone 2" TEXT,
-            "Work Location" TEXT
-        )
-        """
-    )
-
     conn.commit()
     conn.close()
 
@@ -183,12 +149,7 @@ def inserisci_utente(nome: str):
     """Inserisce un utente nella tabella utenti."""
     conn = get_connection()
     cursor = conn.cursor()
-
-    cursor.execute(
-        "INSERT INTO utenti (nome) VALUES (?)",
-        (nome,),
-    )
-
+    cursor.execute("INSERT INTO utenti (nome) VALUES (?)", (nome,))
     conn.commit()
     conn.close()
 

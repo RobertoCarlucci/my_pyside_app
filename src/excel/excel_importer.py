@@ -1,6 +1,6 @@
 import pandas as pd
 
-from db.database import inserisci_res10_bulk
+from db.database import importa_bulk
 
 
 def _to_sqlite(val):
@@ -15,8 +15,11 @@ def _to_sqlite(val):
         return val.strftime("%Y-%m-%d %H:%M:%S")
 
     # Gestisci NaT (Not-a-Time)
-    if pd.isna(val):
-        return None
+    try:
+        if pd.isna(val):
+            return None
+    except (TypeError, ValueError):
+        pass
 
     # pandas Int64 / numpy integer → int Python
     if hasattr(val, "item"):
@@ -30,12 +33,12 @@ class ExcelImporter:
     @staticmethod
     def importa(codice: str, df, progress_callback=None):
         """
-        Importa i dati del file res10 nel DB in un'unica transazione.
-        df = DataFrame validato e mappato
+        Importa un DataFrame nel DB nella tabella corrispondente al codice.
+        Funziona per qualsiasi modello definito in JSON.
         progress_callback(current, total): opzionale, per aggiornare la UI.
         """
         righe = [
             {col: _to_sqlite(val) for col, val in row.items()}
             for _, row in df.iterrows()
         ]
-        inserisci_res10_bulk(righe, progress_callback)
+        importa_bulk(codice, righe, progress_callback)

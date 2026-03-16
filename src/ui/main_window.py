@@ -1,8 +1,9 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QMessageBox
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt
 
-from db.database import init_db, inserisci_utente, lista_utenti
+from db.database import init_db, crea_tabelle_modelli, inserisci_utente, lista_utenti
+from excel.file_model import FileModel
 from controllers.main_excel import MainExcel
 
 # IMPORTA I MODULI DI STILE
@@ -15,6 +16,19 @@ class MainWindow(QWidget):
         super().__init__()
 
         init_db()
+        modelli = []
+        for codice in FileModel.get_all_models():
+            try:
+                m = FileModel.load_model(codice)
+                if m:
+                    modelli.append(m)
+            except ValueError as e:
+                QMessageBox.warning(
+                    None,
+                    "Modello non valido",
+                    f"Il file {codice}.json contiene errori e verrà ignorato:\n\n{e}",
+                )
+        crea_tabelle_modelli(modelli)
 
         self.setWindowTitle("Gestione Excel")
         self._bg_label = (

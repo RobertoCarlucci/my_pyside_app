@@ -1,6 +1,5 @@
 import json
 import os
-from excel.excel_validator import ExcelValidator
 
 
 class FileModel:
@@ -26,7 +25,9 @@ class FileModel:
                 f"Riga {e.lineno}, Colonna {e.colno}: {e.msg}"
             ) from e
         except Exception as e:
-            raise ValueError(f"Errore nel caricamento del modello {codice_file}: {e}") from e
+            raise ValueError(
+                f"Errore nel caricamento del modello {codice_file}: {e}"
+            ) from e
 
     @classmethod
     def get_colonne_attese(cls, codice_file: str):
@@ -44,6 +45,8 @@ class FileModel:
 
     @classmethod
     def verifica_colonne(cls, df, codice_file: str):
+        from excel.excel_validator import ExcelValidator
+
         colonne_attese = cls.get_colonne_attese(codice_file)
         if not colonne_attese:
             return False, df
