@@ -7,7 +7,7 @@ class FileModel:
     Carica e gestisce i modelli Excel definiti in JSON.
     """
 
-    MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
+    MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
 
     @classmethod
     def load_model(cls, codice_file: str):
@@ -56,6 +56,24 @@ class FileModel:
 
     @classmethod
     def get_all_models(cls):
-        """Ritorna tutti i modelli disponibili leggendo i JSON."""
-        files = os.listdir(cls.MODELS_DIR)
-        return [f.replace(".json", "") for f in files if f.endswith(".json")]
+        """Ritorna i codici di tutti i modelli Excel disponibili.
+
+        Filtra i JSON in cui 'nome_file' ha estensione .xlsx o .xls;
+        ignora silenziosamente i file di altri tipi.
+        """
+        result = []
+        for fname in os.listdir(cls.MODELS_DIR):
+            if not fname.endswith(".json"):
+                continue
+            path = os.path.join(cls.MODELS_DIR, fname)
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+            except Exception:
+                continue
+            nome_file = data.get("nome_file", "")
+            ext = os.path.splitext(nome_file)[1].lower()
+            if ext not in (".xlsx", ".xls"):
+                continue
+            result.append(fname.replace(".json", ""))
+        return result

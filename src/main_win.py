@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 
 from db.database import init_db, crea_tabelle_modelli
-from excel.file_model import FileModel
+from excel.excel_model import FileModel
 from ui.style.background_style import apply_background
 from ui.style.button_styles import apply_button_style
 

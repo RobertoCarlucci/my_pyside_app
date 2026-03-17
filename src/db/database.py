@@ -7,7 +7,7 @@ DB_PATH = os.path.join(BASE_DIR, "app.db")
 
 # Percorso cartella modelli JSON (relativo a questo file)
 _MODELS_DIR = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "excel", "models")
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models")
 )
 
 # Mapping tipi JSON → SQL (compatibile SQLite e MariaDB)

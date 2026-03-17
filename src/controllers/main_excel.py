@@ -1,6 +1,6 @@
 from excel.file_selector import FileSelector
 from excel.file_authorizer import FileAuthorizer
-from excel.file_model import FileModel
+from excel.excel_model import FileModel
 from excel.excel_loader import carica_excel
 from excel.excel_validator import ExcelValidator
 from excel.excel_importer import ExcelImporter

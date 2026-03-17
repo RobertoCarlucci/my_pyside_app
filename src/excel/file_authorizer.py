@@ -1,5 +1,5 @@
 import os
-from excel.file_model import FileModel
+from excel.excel_model import FileModel
 
 
 class FileAuthorizer:
