@@ -1,0 +1,20 @@
+{
+    "nome_file": "Date.xlsx",
+    "codice": "date",
+    "colonne_attese": [
+        "ID",
+        "MonthName",
+        "Month",
+        "Quarter",
+        "Half",
+        "Year"
+    ],
+    "tipi_colonne": {
+        "ID": "INTEGER",
+        "MonthName": "TEXT",
+        "Month": "INTEGER",
+        "Quarter": "INTEGER",
+        "Half": "INTEGER",
+        "Year": "INTEGER"
+    }
+}

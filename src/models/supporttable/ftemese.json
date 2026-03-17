@@ -1,0 +1,20 @@
+{
+    "nome_file": "FTE_Mese.xlsx",
+    "codice": "ftemese",
+    "colonne_attese": [
+        "id",
+        "KeyID",
+        "Year",
+        "Quarter",
+        "Month",
+        "Divisore"
+    ],
+    "tipi_colonne": {
+        "id": "INTEGER",
+        "KeyID": "INTEGER",
+        "Year": "INTEGER",
+        "Quarter": "INTEGER",
+        "Month": "INTEGER",
+        "Divisore": "INTEGER"
+    }
+}

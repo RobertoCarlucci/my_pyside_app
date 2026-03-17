@@ -1,0 +1,53 @@
+{
+    "nome_file": "utente",
+    "codice": "utente",
+    "descrizione": "Modello utente applicativo (autenticazione e autorizzazione)",
+    "colonne_attese": [
+        "NomeUtente",
+        "PasswordHash",
+        "Email",
+        "AvatarPath",
+        "Ruolo",
+        "Tipo"
+    ],
+    "tipi_colonne": {
+        "NomeUtente": "string",
+        "PasswordHash": "string",
+        "Email": "string",
+        "AvatarPath": "string",
+        "Ruolo": "string",
+        "Tipo": "string"
+    },
+    "valori_enum": {
+        "Ruolo": [
+            "Operatore",
+            "Amministratore"
+        ],
+        "Tipo": [
+            "Locale",
+            "Rete"
+        ]
+    },
+    "vincoli": {
+        "NomeUtente": {
+            "nullable": false
+        },
+        "PasswordHash": {
+            "nullable": true
+        },
+        "Email": {
+            "nullable": true
+        },
+        "AvatarPath": {
+            "nullable": true
+        },
+        "Ruolo": {
+            "nullable": false,
+            "default": "Operatore"
+        },
+        "Tipo": {
+            "nullable": false,
+            "default": "Locale"
+        }
+    }
+}
