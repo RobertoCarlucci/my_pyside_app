@@ -17,3 +17,12 @@ venv/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Database SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# File di Log e Importazione
+import_log.json
+*.log
