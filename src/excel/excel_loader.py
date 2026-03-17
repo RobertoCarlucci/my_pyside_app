@@ -15,6 +15,11 @@ def carica_excel(percorso_file):
     """
     try:
         df = pd.read_excel(percorso_file)
+        if len(df.columns) == 0:
+            msg = "Il file Excel è vuoto: nessuna colonna trovata"
+            logger.error(msg)
+            print(f"❌ {msg}")
+            return None
         logger.info(f"File Excel caricato: {percorso_file}")
         logger.info(f"Colonne trovate: {list(df.columns)}")
         logger.info(f"Numero di righe: {len(df)}")

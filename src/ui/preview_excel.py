@@ -43,6 +43,18 @@ class PreviewExcel(QDialog):
 
         layout.addWidget(table)
 
+        # Contatore righe
+        totale_righe = len(df)
+        label_righe = QLabel(
+            f"Numero di righe lette nel file da importare:  <b>{totale_righe}</b>"
+        )
+        label_righe.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        label_righe.setStyleSheet(
+            "font-size: 15px; font-family: 'Segoe UI Semibold', 'Arial', sans-serif;"
+            " color: #1a5fa8; padding: 6px 8px;"
+        )
+        layout.addWidget(label_righe)
+
         # Pulsanti
         buttons = QHBoxLayout()
 

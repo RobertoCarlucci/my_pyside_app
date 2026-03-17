@@ -14,6 +14,42 @@ from PySide6.QtWidgets import QDialog
 from PySide6.QtCore import QThread, Signal
 
 
+class _PrepWorker(QThread):
+    """Carica e valida il file Excel su thread separato."""
+
+    pronto = Signal(object, list, list)  # (df_validato, errori, warning)
+    errore = Signal(str)
+
+    def __init__(self, file_path: str, codice: str, parent=None):
+        super().__init__(parent)
+        self._file_path = file_path
+        self._codice = codice
+
+    def run(self):
+        try:
+            df = carica_excel(self._file_path)
+            if df is None:
+                self.errore.emit("Errore nel caricamento Excel")
+                return
+            if len(df) == 0:
+                self.errore.emit("Il file Excel non contiene righe di dati")
+                return
+
+            colonne_attese = FileModel.get_colonne_attese(self._codice)
+            if not colonne_attese:
+                self.errore.emit("Modello colonne non trovato")
+                return
+
+            tipi_attesi = FileModel.get_tipi_colonne(self._codice)
+
+            _ok, df_validato, errori, warning = ExcelValidator.valida(
+                df, colonne_attese, tipi_attesi
+            )
+            self.pronto.emit(df_validato, errori, warning)
+        except Exception as e:
+            self.errore.emit(str(e))
+
+
 class _ImportWorker(QThread):
     """Esegue l'import su un thread separato per non bloccare la UI."""
 
@@ -46,17 +82,19 @@ class MainExcel:
         per aggiornare label o mostrare messaggi.
         """
         self.ui = parent_ui
-        self._worker = None  # mantiene il riferimento al thread attivo
+        self._prep_worker = None
+        self._worker = None
 
     def start_import(self):
         """Flusso completo di importazione Excel."""
 
-        # Blocca subito il pulsante per evitare doppi avvii
         self.ui.btn_importa.setEnabled(False)
         self.ui.label.setText("")
 
         def _ripristina():
             self.ui.btn_importa.setEnabled(True)
+            self.ui.progress_bar.setMaximum(100)
+            self.ui.progress_bar.setValue(0)
 
         # 1. Selezione file
         file_path = FileSelector.seleziona_excel(self.ui)
@@ -76,83 +114,79 @@ class MainExcel:
             _ripristina()
             return
 
-        # 3. Caricamento Excel
+        # 3-6. Caricamento + validazione su thread separato
+        self.ui.progress_bar.setMinimum(0)
+        self.ui.progress_bar.setMaximum(0)  # indeterminata → animazione pulsante
         self.ui.label.setText("⏳ Caricamento file...")
-        df = carica_excel(file_path)
-        if df is None:
-            self.ui.label.setText("❌ Errore nel caricamento Excel")
+
+        def _on_prep_error(msg: str):
+            self.ui.label.setText(f"❌ {msg}")
             _ripristina()
-            return
 
-        # 4. Colonne attese dal modello JSON
-        colonne_attese = FileModel.get_colonne_attese(codice)
-        if not colonne_attese:
-            self.ui.label.setText("❌ Modello colonne non trovato")
-            _ripristina()
-            return
-
-        # 5. Tipi attesi dal modello JSON
-        tipi_attesi = FileModel.get_tipi_colonne(codice)
-
-        # 6. Validazione + mappatura + tipi
-        self.ui.label.setText("⏳ Validazione in corso...")
-        ok, df_validato, errori, warning = ExcelValidator.valida(
-            df, colonne_attese, tipi_attesi
-        )
-
-        # ERRORI → bloccanti
-        if errori:
-            reporter = ErrorReporter()
-            reporter.extend_errors(errori)
-            dlg = ErrorDialog(reporter.get_error_text())
-            dlg.exec()
-            self.ui.label.setText("❌ Importazione annullata")
-            _ripristina()
-            return
-
-        # WARNING → chiedi conferma
-        risposta = QDialog.DialogCode.Accepted
-        if warning:
-            reporter = ErrorReporter()
-            reporter.extend_warnings(warning)
-            dlg = WarningDialog(reporter.get_warning_text())
-            risposta = dlg.exec()
-
-        if risposta == QDialog.DialogCode.Rejected:
-            self.ui.label.setText("⚠️ Importazione annullata dall'utente")
-            _ripristina()
-            return
-
-        # 7. Mostra anteprima
-        def conferma_import():
-            totale = len(df_validato)
-            self.ui.progress_bar.setMaximum(totale)
+        def _on_pronto(df_validato, errori, warning):
+            # Torna a modalità determinata
+            self.ui.progress_bar.setMaximum(100)
             self.ui.progress_bar.setValue(0)
-            self.ui.label.setText("⏳ Salvataggio in corso...")
-
-            worker = _ImportWorker(codice, df_validato, self.ui)
-            worker.progress.connect(lambda c, _t: self.ui.progress_bar.setValue(c))
-
-            def _on_finished():
-                self.ui.progress_bar.setValue(totale)
-                # btn_importa resta disabilitato: l'utente deve premere "Nuova Importazione"
-                self.ui.btn_nuova.setEnabled(True)
-                self.ui.label.setText("✔️ Importazione completata")
-                evento = ExcelLogger.crea_evento(
-                    file_path=file_path, codice=codice, righe=totale, esito="OK"
-                )
-                ExcelLogger.log(evento)
-
-            def _on_error(msg: str):
-                _ripristina()
-                self.ui.label.setText(f"❌ Errore: {msg}")
-
-            worker.finished.connect(_on_finished)
-            worker.error.connect(_on_error)
-            self._worker = worker
-            worker.start()
-
-        preview = PreviewExcel(df_validato, conferma_import)
-        if preview.exec() == QDialog.DialogCode.Rejected:
             self.ui.label.setText("")
-            _ripristina()
+
+            # ERRORI → bloccanti
+            if errori:
+                reporter = ErrorReporter()
+                reporter.extend_errors(errori)
+                dlg = ErrorDialog(reporter.get_error_text())
+                dlg.exec()
+                self.ui.label.setText("❌ Importazione annullata")
+                _ripristina()
+                return
+
+            # WARNING → chiedi conferma
+            risposta = QDialog.DialogCode.Accepted
+            if warning:
+                reporter = ErrorReporter()
+                reporter.extend_warnings(warning)
+                dlg = WarningDialog(reporter.get_warning_text())
+                risposta = dlg.exec()
+
+            if risposta == QDialog.DialogCode.Rejected:
+                self.ui.label.setText("⚠️ Importazione annullata dall'utente")
+                _ripristina()
+                return
+
+            # 7. Mostra anteprima
+            def conferma_import():
+                totale = len(df_validato)
+                self.ui.progress_bar.setMaximum(totale)
+                self.ui.progress_bar.setValue(0)
+                self.ui.label.setText("⏳ Salvataggio in corso...")
+
+                worker = _ImportWorker(codice, df_validato, self.ui)
+                worker.progress.connect(lambda c, _t: self.ui.progress_bar.setValue(c))
+
+                def _on_finished():
+                    self.ui.progress_bar.setValue(totale)
+                    self.ui.btn_nuova.setEnabled(True)
+                    self.ui.label.setText("✔️ Importazione completata")
+                    evento = ExcelLogger.crea_evento(
+                        file_path=file_path, codice=codice, righe=totale, esito="OK"
+                    )
+                    ExcelLogger.log(evento)
+
+                def _on_error(msg: str):
+                    _ripristina()
+                    self.ui.label.setText(f"❌ Errore: {msg}")
+
+                worker.finished.connect(_on_finished)
+                worker.error.connect(_on_error)
+                self._worker = worker
+                worker.start()
+
+            preview = PreviewExcel(df_validato, conferma_import)
+            if preview.exec() == QDialog.DialogCode.Rejected:
+                self.ui.label.setText("")
+                _ripristina()
+
+        prep = _PrepWorker(file_path, codice, self.ui)
+        prep.pronto.connect(_on_pronto)
+        prep.errore.connect(_on_prep_error)
+        self._prep_worker = prep
+        prep.start()

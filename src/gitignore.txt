@@ -18,6 +18,19 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Database SQLite
+*.sqlite
+*.sqlite3
+*.db
+
+# File di Log e Importazione
+import_log.json
+*.log
+
+git rm --cached src/app.db
+
+git rm --cached import_log.json
+
 
 5. Configurazione per GitHub (file .gitignore)
 Se prevedi di caricare il progetto su GitHub, è fondamentale che i file dell'ambiente virtuale non vengano caricati:

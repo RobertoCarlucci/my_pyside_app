@@ -19,6 +19,8 @@ class ExcelValidator:
     # ---------------------------------------------------------
     @staticmethod
     def rimuovi_header_vuoto(df: pd.DataFrame):
+        if df.empty:
+            return df
         if df.iloc[0].isna().all():
             df = df.iloc[1:].reset_index(drop=True)
         return df
