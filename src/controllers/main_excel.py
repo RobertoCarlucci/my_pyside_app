@@ -85,6 +85,13 @@ class MainExcel:
         self._prep_worker = None
         self._worker = None
 
+    def cleanup(self):
+        """Ferma i thread attivi in modo pulito (chiamare prima di chiudere la finestra)."""
+        for worker in (self._prep_worker, self._worker):
+            if worker is not None and worker.isRunning():
+                worker.quit()
+                worker.wait(3000)  # max 3 secondi
+
     def start_import(self):
         """Flusso completo di importazione Excel."""
 

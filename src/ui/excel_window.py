@@ -111,6 +111,11 @@ class ExcelWindow(QWidget):
     def _torna_al_menu(self):
         self.close()
 
+    def closeEvent(self, event):
+        """Ferma i thread attivi prima di chiudere per evitare 'QMutex: destroying locked mutex'."""
+        self.excel.cleanup()
+        super().closeEvent(event)
+
     # ------------------------------------------------------------------
     # Ridimensionamento sfondo (cover centrato)
     # ------------------------------------------------------------------
