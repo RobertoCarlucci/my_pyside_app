@@ -1,9 +1,10 @@
-import sqlite3
 import os
+import sqlite3
 
-# Percorso del file DB (nella cartella principale del progetto)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_PATH = os.path.join(BASE_DIR, "app.db")
+# Percorso del database (project_root/app.db)
+DB_PATH = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app.db")
+)
 
 # Percorso cartella modelli JSON (relativo a questo file)
 _MODELS_DIR = os.path.normpath(
@@ -13,6 +14,7 @@ _MODELS_DIR = os.path.normpath(
 # Mapping tipi JSON → SQL (compatibile SQLite e MariaDB)
 # SQLite accetta DATE/DATETIME come alias di TEXT affinity;
 # MariaDB li riconosce come tipi nativi.
+
 _TIPO_SQL: dict[str, str] = {
     "string": "TEXT",
     "str": "TEXT",
@@ -153,14 +155,12 @@ def init_db():
     """Crea il database e la tabella utenti se non esiste."""
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(
-        """
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS utenti (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nome TEXT NOT NULL
         )
-        """
-    )
+        """)
     conn.commit()
     conn.close()
 

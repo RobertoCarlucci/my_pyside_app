@@ -1,12 +1,4 @@
-from PySide6.QtWidgets import (
-    QDialog,
-    QVBoxLayout,
-    QLabel,
-    QPushButton,
-    QTextEdit,
-    QHBoxLayout,
-)
-from PySide6.QtCore import Qt
+from App import *
 
 
 class WarningDialog(QDialog):
