@@ -1,7 +1,7 @@
 from App import *
 
 from controllers.main_excel import MainExcel
-from ui.style.background_style import apply_background
+from ui.style.background_style import apply_background_style, resize_background
 from ui.style.button_styles import apply_button_style
 
 
@@ -20,12 +20,12 @@ class ExcelWindow(QWidget):
 
         self.setWindowTitle("Gestione Excel")
         self._bg_label = None
-        self.resize(800, 600)
+        self.resize(960, 540)
 
         # Sfondo personalizzato
-        self._bg_label = apply_background(
-            self, "assets/backgrounds/wallpaper_dl.png", opacity=0.35
-        )
+        self._bg_label = apply_background_style(
+            self, "default"
+        )  # o "default" / "light"
 
         grid = QGridLayout()
         grid.setSpacing(12)
@@ -55,7 +55,7 @@ class ExcelWindow(QWidget):
         grid.addWidget(self.btn_nuova, 0, 1)
 
         # --- (1,0) Pulsante Aggiorna Support Table ---
-        self.btn_support = QPushButton("🔁  Aggiorna\nSupport Table")
+        self.btn_support = QPushButton("🔁  Aggiorna Support Table")
         apply_button_style(self.btn_support, "warning")
         grid.addWidget(self.btn_support, 1, 0)
 
@@ -112,20 +112,8 @@ class ExcelWindow(QWidget):
     # ------------------------------------------------------------------
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        # Sfondo cover centrato
-        bg = self._bg_label
-        if bg is not None:
-            src = getattr(bg, "_src_pixmap", None)
-            if src is not None:
-                scaled = src.scaled(
-                    self.size(),
-                    Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-                    Qt.TransformationMode.SmoothTransformation,
-                )
-                x = (self.width() - scaled.width()) // 2
-                y = (self.height() - scaled.height()) // 2
-                bg.setPixmap(scaled)
-                bg.setGeometry(x, y, scaled.width(), scaled.height())
+        if self._bg_label is not None:
+            resize_background(self, self._bg_label)
         # Progress bar sempre incollata al fondo (22px altezza + 2px sopra + 2px sotto)
         pb_h = 26
         self.progress_bar.setGeometry(

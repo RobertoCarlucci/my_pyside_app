@@ -7,7 +7,7 @@ from PySide6.QtCore import Qt
 _SRC_DIR = Path(__file__).resolve().parent.parent.parent
 
 BACKGROUND_STYLES = {
-    "default": {"image": "assets/backgrounds/wallpaper_dl.png", "opacity": 0.25},
+    "default": {"image": "assets/backgrounds/wallpaper_dl.png", "opacity": 0.65},
     "dark": {"image": "assets/backgrounds/wallpaper_dl.png", "opacity": 0.40},
     "light": {"image": "assets/backgrounds/wallpaper_dl.png", "opacity": 0.15},
 }
@@ -39,15 +39,44 @@ def apply_background(
     p.end()
 
     bg = QLabel(widget)
-    bg.setPixmap(faded)
-    bg.setScaledContents(False)  # il rescaling viene fatto manualmente nel resizeEvent
+    bg.setScaledContents(False)
     bg._src_pixmap = faded  # type: ignore[attr-defined]
-    bg.setGeometry(widget.rect())
     bg.lower()  # mantiene lo sfondo sotto tutti gli altri widget
-    bg.setAttribute(
-        Qt.WidgetAttribute.WA_TransparentForMouseEvents
-    )  # non cattura mouse
+    bg.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+    resize_background(widget, bg)  # applica subito il cover centrato
     return bg
+
+
+def resize_background(widget: QWidget, bg: QLabel) -> None:
+    """
+    Scala e centra la QLabel di sfondo in modalità cover rispetto a widget.
+    Da chiamare nel resizeEvent della finestra.
+    """
+    src = getattr(bg, "_src_pixmap", None)
+    if src is None:
+        return
+    scaled = src.scaled(
+        widget.size(),
+        Qt.AspectRatioMode.KeepAspectRatio,
+        Qt.TransformationMode.SmoothTransformation,
+    )
+    x = (widget.width() - scaled.width()) // 2
+    y = (widget.height() - scaled.height()) // 2
+    bg.setPixmap(scaled)
+    bg.setGeometry(x, y, scaled.width(), scaled.height())
+
+
+def set_background_style(style_name: str, image: str, opacity: float = 1.0) -> None:
+    """
+    Aggiunge o aggiorna una voce in BACKGROUND_STYLES.
+    style_name: chiave dello stile (es. "default", "dark", "custom")
+    image:      percorso relativo a src/ dell'immagine
+    opacity:    valore tra 0.0 e 1.0
+    """
+    BACKGROUND_STYLES[style_name] = {
+        "image": image,
+        "opacity": max(0.0, min(1.0, opacity)),
+    }
 
 
 def apply_background_style(widget: QWidget, style_name: str) -> QLabel | None:

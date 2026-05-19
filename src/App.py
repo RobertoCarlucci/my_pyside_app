@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QPixmap, QPainter
 from PySide6.QtCore import Qt
 
 # Assicura che la cartella src sia nel path e sia la cwd,

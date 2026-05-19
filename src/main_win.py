@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt
 
 from db.database import init_db, crea_tabelle_modelli
 from excel.excel_model import FileModel
-from ui.style.background_style import apply_background
+from ui.style.background_style import apply_background_style, resize_background
 from ui.style.button_styles import apply_button_style
 
 
@@ -42,12 +42,12 @@ class MainWindow(QWidget):
 
         self.setWindowTitle("Gestione")
         self._bg_label = None
-        self.resize(900, 650)
+        self.resize(960, 540)
 
         # Sfondo personalizzato
-        self._bg_label = apply_background(
-            self, "assets/backgrounds/wallpaper_dl.png", opacity=0.35
-        )
+        self._bg_label = apply_background_style(
+            self, "default"
+        )  # o "default" / "light"
 
         grid = QGridLayout()
         grid.setSpacing(16)
@@ -60,7 +60,7 @@ class MainWindow(QWidget):
 
         # --- (0,0) Gestione Excel ---
         btn_excel = QPushButton("📊  Gestione Excel")
-        apply_button_style(btn_excel, "primary")
+        apply_button_style(btn_excel, "my_button")
         btn_excel.clicked.connect(self._apri_excel_window)
         grid.addWidget(btn_excel, 0, 0)
 
@@ -103,18 +103,5 @@ class MainWindow(QWidget):
     # ------------------------------------------------------------------
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        bg = self._bg_label
-        if bg is None:
-            return
-        src = getattr(bg, "_src_pixmap", None)
-        if src is None:
-            return
-        scaled = src.scaled(
-            self.size(),
-            Qt.AspectRatioMode.KeepAspectRatioByExpanding,
-            Qt.TransformationMode.SmoothTransformation,
-        )
-        x = (self.width() - scaled.width()) // 2
-        y = (self.height() - scaled.height()) // 2
-        bg.setPixmap(scaled)
-        bg.setGeometry(x, y, scaled.width(), scaled.height())
+        if self._bg_label is not None:
+            resize_background(self, self._bg_label)

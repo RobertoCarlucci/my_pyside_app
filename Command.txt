@@ -1,0 +1,19 @@
+python --version
+python.exe -m pip install --upgrade pip
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+pip show PySide6
+pip install pyside6
+pip install pyqt6-tools
+.\venv\Lib\site-packages\PySide6\designer.exe
+
+python "main".py
+python src\main.py
+
+Ctrl + Shift + P
+Python: Seleziona interprete
+Dall'elenco che appare, scegli quello contrassegnato con 'venv'
+
+Ctrl + ò
+Terminale
