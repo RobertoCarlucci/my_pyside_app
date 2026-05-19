@@ -1,8 +1,12 @@
+from pathlib import Path
+
 from App import *
+from PySide6.QtCore import QSize
+from PySide6.QtGui import QIcon
 
 from controllers.main_excel import MainExcel
 from ui.style.background_style import apply_background_style, resize_background
-from ui.style.button_styles import apply_button_style
+from ui.style.button_styles import apply_button_style, get_icon
 
 
 class ExcelWindow(QWidget):
@@ -41,21 +45,27 @@ class ExcelWindow(QWidget):
             grid.setColumnStretch(c, 1)
 
         # --- (0,0) Pulsante importazione ---
-        self.btn_importa = QPushButton("📂  Importa Excel")
+        self.btn_importa = QPushButton(" Importa Excel")
+        self.btn_importa.setIcon(get_icon("folder-open-document.png"))
+        self.btn_importa.setIconSize(QSize(16, 16))
         apply_button_style(self.btn_importa, "primary")
         self.excel = MainExcel(self)
         self.btn_importa.clicked.connect(self.excel.start_import)
         grid.addWidget(self.btn_importa, 0, 0)
 
         # --- (0,1) Pulsante nuova importazione (abilitato solo a fine ciclo) ---
-        self.btn_nuova = QPushButton("🔄  Nuova Importazione")
+        self.btn_nuova = QPushButton(" Nuova Importazione")
+        self.btn_nuova.setIcon(get_icon("arrow-repeat.png"))
+        self.btn_nuova.setIconSize(QSize(16, 16))
         apply_button_style(self.btn_nuova, "secondary")
         self.btn_nuova.setEnabled(False)
         self.btn_nuova.clicked.connect(self._nuova_importazione)
         grid.addWidget(self.btn_nuova, 0, 1)
 
         # --- (1,0) Pulsante Aggiorna Support Table ---
-        self.btn_support = QPushButton("🔁  Aggiorna Support Table")
+        self.btn_support = QPushButton(" Aggiorna Support Table")
+        self.btn_support.setIcon(get_icon("table--arrow.png"))
+        self.btn_support.setIconSize(QSize(16, 16))
         apply_button_style(self.btn_support, "warning")
         grid.addWidget(self.btn_support, 1, 0)
 
@@ -70,7 +80,9 @@ class ExcelWindow(QWidget):
         grid.addWidget(self.label, 1, 1, 1, 2)
 
         # --- (2,2) Pulsante torna alla finestra principale ---
-        btn_indietro = QPushButton("🏠  Menu principale")
+        btn_indietro = QPushButton(" Menu principale")
+        btn_indietro.setIcon(get_icon("home.png"))
+        btn_indietro.setIconSize(QSize(16, 16))
         apply_button_style(btn_indietro, "secondary")
         btn_indietro.clicked.connect(self._torna_al_menu)
         grid.addWidget(btn_indietro, 2, 2)

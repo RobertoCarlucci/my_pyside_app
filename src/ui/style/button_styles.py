@@ -69,9 +69,19 @@ BUTTON_STYLES = {
     },
 }
 
+from pathlib import Path
+
 from PySide6.QtWidgets import QPushButton
 from PySide6.QtWidgets import QGraphicsDropShadowEffect
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QIcon
+from PySide6.QtCore import QSize
+
+_ICON_DIR = Path(__file__).resolve().parent / "icon" / "icons"
+
+
+def get_icon(name: str) -> QIcon:
+    """Restituisce un QIcon dal set Fugue. Es: get_icon('table-excel.png')"""
+    return QIcon(str(_ICON_DIR / name))
 
 
 def apply_button_style(button: QPushButton, style_name: str):

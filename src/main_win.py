@@ -5,12 +5,14 @@ from PySide6.QtWidgets import (
     QMessageBox,
     QApplication,
 )
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QIcon
+
 
 from db.database import init_db, crea_tabelle_modelli
 from excel.excel_model import FileModel
 from ui.style.background_style import apply_background_style, resize_background
-from ui.style.button_styles import apply_button_style
+from ui.style.button_styles import apply_button_style, get_icon
 
 
 class MainWindow(QWidget):
@@ -59,13 +61,17 @@ class MainWindow(QWidget):
             grid.setColumnStretch(c, 1)
 
         # --- (0,0) Gestione Excel ---
-        btn_excel = QPushButton("📊  Gestione Excel")
+        btn_excel = QPushButton(" Gestione Excel")
+        btn_excel.setIcon(get_icon("table-excel.png"))
+        btn_excel.setIconSize(QSize(16, 16))
         apply_button_style(btn_excel, "my_button")
         btn_excel.clicked.connect(self._apri_excel_window)
         grid.addWidget(btn_excel, 0, 0)
 
         # --- (2,2) Esci ---
-        btn_esci = QPushButton("🚪  Esci")
+        btn_esci = QPushButton(" Esci")
+        btn_esci.setIcon(get_icon("door-open-out.png"))
+        btn_esci.setIconSize(QSize(16, 16))
         apply_button_style(btn_esci, "danger")
         btn_esci.clicked.connect(self._esci)
         grid.addWidget(btn_esci, 2, 2)
