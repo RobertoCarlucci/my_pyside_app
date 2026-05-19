@@ -74,7 +74,6 @@ from pathlib import Path
 from PySide6.QtWidgets import QPushButton
 from PySide6.QtWidgets import QGraphicsDropShadowEffect
 from PySide6.QtGui import QColor, QIcon
-from PySide6.QtCore import QSize
 
 _ICON_DIR = Path(__file__).resolve().parent / "icon" / "icons"
 

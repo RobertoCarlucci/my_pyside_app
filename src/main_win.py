@@ -6,8 +6,6 @@ from PySide6.QtWidgets import (
     QApplication,
 )
 from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon
-
 
 from db.database import init_db, crea_tabelle_modelli
 from excel.excel_model import FileModel

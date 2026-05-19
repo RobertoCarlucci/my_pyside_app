@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (
 )
 
 from PySide6.QtGui import QFont, QPixmap, QPainter
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSize
 
 # Assicura che la cartella src sia nel path e sia la cwd,
 # indipendentemente da dove viene lanciato lo script.

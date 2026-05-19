@@ -1,8 +1,4 @@
-from pathlib import Path
-
 from App import *
-from PySide6.QtCore import QSize
-from PySide6.QtGui import QIcon
 
 from controllers.main_excel import MainExcel
 from ui.style.background_style import apply_background_style, resize_background
@@ -48,7 +44,7 @@ class ExcelWindow(QWidget):
         self.btn_importa = QPushButton(" Importa Excel")
         self.btn_importa.setIcon(get_icon("folder-open-document.png"))
         self.btn_importa.setIconSize(QSize(16, 16))
-        apply_button_style(self.btn_importa, "primary")
+        apply_button_style(self.btn_importa, "my_button")
         self.excel = MainExcel(self)
         self.btn_importa.clicked.connect(self.excel.start_import)
         grid.addWidget(self.btn_importa, 0, 0)
@@ -57,7 +53,7 @@ class ExcelWindow(QWidget):
         self.btn_nuova = QPushButton(" Nuova Importazione")
         self.btn_nuova.setIcon(get_icon("arrow-repeat.png"))
         self.btn_nuova.setIconSize(QSize(16, 16))
-        apply_button_style(self.btn_nuova, "secondary")
+        apply_button_style(self.btn_nuova, "my_button")
         self.btn_nuova.setEnabled(False)
         self.btn_nuova.clicked.connect(self._nuova_importazione)
         grid.addWidget(self.btn_nuova, 0, 1)
@@ -66,7 +62,7 @@ class ExcelWindow(QWidget):
         self.btn_support = QPushButton(" Aggiorna Support Table")
         self.btn_support.setIcon(get_icon("table--arrow.png"))
         self.btn_support.setIconSize(QSize(16, 16))
-        apply_button_style(self.btn_support, "warning")
+        apply_button_style(self.btn_support, "my_button")
         grid.addWidget(self.btn_support, 1, 0)
 
         # --- (1, 1:3) Label di stato ---
