@@ -1,16 +1,20 @@
+# from main import *
+
 from PySide6.QtWidgets import (
     QWidget,
     QGridLayout,
+    QVBoxLayout,
     QPushButton,
     QMessageBox,
     QApplication,
 )
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QEvent
 
 from db.database import init_db, crea_tabelle_modelli
 from excel.excel_model import FileModel
 from ui.style.background_style import apply_background_style, resize_background
 from ui.style.button_styles import apply_button_style, get_icon
+from ui.style.titlebar_style import CustomTitleBar
 
 
 class MainWindow(QWidget):
@@ -40,16 +44,27 @@ class MainWindow(QWidget):
                 )
         crea_tabelle_modelli(modelli)
 
-        self.setWindowTitle("Gestione")
+        self.setWindowTitle("Gestione Pv_PMO.")
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
         self._bg_label = None
         self.resize(960, 540)
 
         # Sfondo personalizzato
-        self._bg_label = apply_background_style(
-            self, "default"
-        )  # o "default" / "light"
+        self._bg_label = apply_background_style(self, "default")
 
-        grid = QGridLayout()
+        # Layout principale: title bar in cima + contenuto sotto
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        self.title_bar = CustomTitleBar(self)
+        self.title_bar.setFixedHeight(32)
+        main_layout.addWidget(self.title_bar)
+
+        # Widget contenuto con la griglia pulsanti
+        content = QWidget(self)
+        content.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        grid = QGridLayout(content)
         grid.setSpacing(16)
         grid.setContentsMargins(40, 40, 40, 40)
 
@@ -74,7 +89,8 @@ class MainWindow(QWidget):
         btn_esci.clicked.connect(self._esci)
         grid.addWidget(btn_esci, 2, 2)
 
-        self.setLayout(grid)
+        main_layout.addWidget(content)
+        self.setLayout(main_layout)
 
         # Riferimento alla finestra Excel (lazy, creata al primo click)
         self._excel_window = None
@@ -101,6 +117,14 @@ class MainWindow(QWidget):
         )
         if risposta == QMessageBox.StandardButton.Yes:
             QApplication.quit()
+
+    # ------------------------------------------------------------------
+    # Propagazione stato finestra alla title bar
+    # ------------------------------------------------------------------
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        if event.type() == QEvent.Type.WindowStateChange:
+            self.title_bar.window_state_changed(self.windowState())
 
     # ------------------------------------------------------------------
     # Ridimensionamento sfondo (cover centrato)

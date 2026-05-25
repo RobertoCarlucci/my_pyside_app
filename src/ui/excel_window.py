@@ -1,4 +1,13 @@
-from App import *
+from PySide6.QtWidgets import (
+    QWidget,
+    QGridLayout,
+    QLabel,
+    QPushButton,
+    QProgressBar,
+)
+
+from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt, QSize
 
 from controllers.main_excel import MainExcel
 from ui.style.background_style import apply_background_style, resize_background
