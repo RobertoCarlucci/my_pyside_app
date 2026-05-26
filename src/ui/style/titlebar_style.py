@@ -1,13 +1,9 @@
-from PySide6.QtCore import QEvent, QSize, Qt
-from PySide6.QtGui import QPalette
+from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import (
-    QApplication,
     QHBoxLayout,
     QLabel,
-    QMainWindow,
     QStyle,
     QToolButton,
-    QVBoxLayout,
     QWidget,
 )
 
@@ -16,7 +12,7 @@ class CustomTitleBar(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
         self.setAutoFillBackground(True)
-        self.setBackgroundRole(QPalette.ColorRole.Highlight)
+        self.setStyleSheet("CustomTitleBar { background-color: #A8FF0E; }")
         self.initial_pos = None
         title_bar_layout = QHBoxLayout(self)
         title_bar_layout.setContentsMargins(1, 1, 1, 1)
@@ -25,7 +21,8 @@ class CustomTitleBar(QWidget):
         self.title = QLabel(f"{self.__class__.__name__}", self)
         self.title.setStyleSheet("""QLabel {
                    font-weight: bold;
-                   border: 2px solid black;
+                   color: #741B7C;
+                   border: 2px solid #FFFFFF;
                    border-radius: 12px;
                    margin: 2px;
                 }
@@ -49,7 +46,7 @@ class CustomTitleBar(QWidget):
             QStyle.StandardPixmap.SP_TitleBarMaxButton,
         )
         self.max_button.setIcon(max_icon)
-        self.max_button.clicked.connect(self.window().showMaximized)
+        self.max_button.clicked.connect(self.window()._on_maximize)
 
         # Close button
         self.close_button = QToolButton(self)
@@ -65,7 +62,7 @@ class CustomTitleBar(QWidget):
             QStyle.StandardPixmap.SP_TitleBarNormalButton
         )
         self.normal_button.setIcon(normal_icon)
-        self.normal_button.clicked.connect(self.window().showNormal)
+        self.normal_button.clicked.connect(self.window()._on_restore)
         self.normal_button.setVisible(False)
         # Add buttons
         buttons = [
@@ -85,7 +82,7 @@ class CustomTitleBar(QWidget):
             title_bar_layout.addWidget(button)
 
     def window_state_changed(self, state):
-        if state == Qt.WindowState.WindowMaximized:
+        if state & Qt.WindowState.WindowMaximized:
             self.normal_button.setVisible(True)
             self.max_button.setVisible(False)
         else:

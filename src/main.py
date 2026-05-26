@@ -4,6 +4,12 @@ import sys
 import signal
 import os
 
+# Forza il debugger pydevd a tracciare correttamente gli eventi PySide6
+os.environ["PYDEVD_PYQT_MODE"] = "pyside6"
+
+# Se necessario, forza l'inizializzazione del tracciamento delle funzioni
+sys.settrace(sys.gettrace())
+
 from main_win import MainWindow
 
 from PySide6.QtWidgets import QApplication

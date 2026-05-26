@@ -1,20 +1,13 @@
-from PySide6.QtWidgets import (
-    QWidget,
-    QGridLayout,
-    QLabel,
-    QPushButton,
-    QProgressBar,
-)
-
+from PySide6.QtWidgets import QGridLayout, QLabel, QPushButton, QProgressBar
 from PySide6.QtGui import QFont
 from PySide6.QtCore import Qt, QSize
 
 from controllers.main_excel import MainExcel
-from ui.style.background_style import apply_background_style, resize_background
 from ui.style.button_styles import apply_button_style, get_icon
+from ui.style.page_style import BasePage
 
 
-class ExcelWindow(QWidget):
+class ExcelWindow(BasePage):
     """
     Finestra di gestione importazione Excel.
     Layout: griglia 3 colonne × 4 righe
@@ -25,18 +18,9 @@ class ExcelWindow(QWidget):
     """
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__("Gestione Pv_PMO.", parent=parent)
 
-        self.setWindowTitle("Gestione Excel")
-        self._bg_label = None
-        self.resize(960, 540)
-
-        # Sfondo personalizzato
-        self._bg_label = apply_background_style(
-            self, "default"
-        )  # o "default" / "light"
-
-        grid = QGridLayout()
+        grid = QGridLayout(self.content)
         grid.setSpacing(12)
         # margine inferiore 30px: lascia spazio alla progress bar (26px) + 4px gap
         grid.setContentsMargins(24, 24, 24, 30)
@@ -92,8 +76,6 @@ class ExcelWindow(QWidget):
         btn_indietro.clicked.connect(self._torna_al_menu)
         grid.addWidget(btn_indietro, 2, 2)
 
-        self.setLayout(grid)
-
         # --- Barra di avanzamento: posizionata manualmente in resizeEvent ---
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setMinimum(0)
@@ -128,10 +110,8 @@ class ExcelWindow(QWidget):
     # Ridimensionamento sfondo (cover centrato)
     # ------------------------------------------------------------------
     def resizeEvent(self, event):
-        super().resizeEvent(event)
-        if self._bg_label is not None:
-            resize_background(self, self._bg_label)
-        # Progress bar sempre incollata al fondo (22px altezza + 2px sopra + 2px sotto)
+        super().resizeEvent(event)  # BasePage gestisce sfondo
+        # Progress bar sempre incollata al fondo
         pb_h = 26
         self.progress_bar.setGeometry(
             24, self.height() - pb_h + 2, self.width() - 48, 22
