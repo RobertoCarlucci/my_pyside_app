@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, cast
+
 from PySide6.QtCore import QSize, Qt
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -6,6 +10,9 @@ from PySide6.QtWidgets import (
     QToolButton,
     QWidget,
 )
+
+if TYPE_CHECKING:
+    from ui.style.page_style import BasePage
 
 
 class CustomTitleBar(QWidget):
@@ -46,7 +53,7 @@ class CustomTitleBar(QWidget):
             QStyle.StandardPixmap.SP_TitleBarMaxButton,
         )
         self.max_button.setIcon(max_icon)
-        self.max_button.clicked.connect(self.window()._on_maximize)
+        self.max_button.clicked.connect(cast("BasePage", self.window())._on_maximize)
 
         # Close button
         self.close_button = QToolButton(self)
@@ -62,7 +69,7 @@ class CustomTitleBar(QWidget):
             QStyle.StandardPixmap.SP_TitleBarNormalButton
         )
         self.normal_button.setIcon(normal_icon)
-        self.normal_button.clicked.connect(self.window()._on_restore)
+        self.normal_button.clicked.connect(cast("BasePage", self.window())._on_restore)
         self.normal_button.setVisible(False)
         # Add buttons
         buttons = [

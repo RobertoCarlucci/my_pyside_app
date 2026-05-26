@@ -18,7 +18,7 @@ class ExcelWindow(BasePage):
     """
 
     def __init__(self, parent=None):
-        super().__init__("Gestione Pv_PMO.", parent=parent)
+        super().__init__("Gestione Excel", parent=parent)
 
         grid = QGridLayout(self.content)
         grid.setSpacing(12)
