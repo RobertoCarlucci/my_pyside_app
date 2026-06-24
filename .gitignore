@@ -10,6 +10,10 @@ venv/
 # VS Code
 .vscode/
 
+# JetBrains
+.idea/
+*.iml
+
 # Qt / PySide
 *.qrc
 *.ui~
