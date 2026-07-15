@@ -1,0 +1,18 @@
+{
+    "nome_file": "FTE_Mese.xlsx",
+    "codice": "fte_mese",
+    "colonne_attese": [
+        "KeyID",
+        "Year",        
+        "Quarter",
+        "Month",
+        "Divisore"
+    ],
+    "tipi_colonne": {
+        "KeyID": "TEXT",
+        "Year": "REAL",
+        "Quarter": "REAL",
+        "Month": "REAL",        
+        "Divisore": "REAL"
+    }
+}

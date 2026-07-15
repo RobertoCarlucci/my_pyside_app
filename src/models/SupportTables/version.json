@@ -1,0 +1,12 @@
+{
+    "nome_file": "version.xlsx",
+    "codice": "version",
+    "colonne_attese": [
+        "PreID",
+        "Group"      
+    ],
+    "tipi_colonne": {
+        "PreID": "TEXT",
+        "Group": "TEXT"      
+    }
+}

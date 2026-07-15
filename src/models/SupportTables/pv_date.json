@@ -1,0 +1,20 @@
+{
+    "nome_file": "pv_date.xlsx",
+    "codice": "pv_date",
+    "colonne_attese": [
+        "IdKey",
+        "MonthName",
+        "Month",
+        "Quarter",
+        "Half",
+        "Year"
+    ],
+    "tipi_colonne": {
+        "IdKey": "INTEGER",
+        "MonthName": "TEXT",
+        "Month": "REAL",
+        "Quarter": "REAL",
+        "Half": "REAL",
+        "Year": "REAL"
+    }
+}

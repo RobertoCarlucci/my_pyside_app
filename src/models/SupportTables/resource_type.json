@@ -1,0 +1,12 @@
+{
+    "nome_file": "ResourceType.xlsx",
+    "codice": "resource_type",
+    "colonne_attese": [
+        "ResourceTypeGroup",
+        "ResourceType"      
+    ],
+    "tipi_colonne": {
+        "ResourceTypeGroup": "TEXT",
+        "ResourceType": "TEXT"
+    }
+}

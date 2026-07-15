@@ -1,0 +1,18 @@
+{
+    "nome_file": "Org.xlsx",
+    "codice": "org",
+    "colonne_attese": [
+        "OrganizationOBS",
+        "SubOrgOBS",
+        "ProvidingOrg",
+        "OrganizationElaborata",
+        "SubOrgElaborata"
+    ],
+    "tipi_colonne": {
+        "OrganizationOBS": "TEXT",
+        "SubOrgOBS": "TEXT",
+        "ProvidingOrg": "TEXT",
+        "OrganizationElaborata": "TEXT",
+        "SubOrgElaborata": "TEXT"
+    }
+}

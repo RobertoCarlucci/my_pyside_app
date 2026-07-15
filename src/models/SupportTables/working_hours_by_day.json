@@ -1,0 +1,18 @@
+{
+    "nome_file": "working_hours_by_day.xlsx",
+    "codice": "working_hours_by_day",
+    "colonne_attese": [
+        "Dateid",
+        "DayNumber",
+        "DayNumber",
+        "Standard",
+        "WorkingDay"        
+    ],
+    "tipi_colonne": {
+        "Dateid": "DATE",
+        "DayNumber": "INTEGER",
+        "DayName": "TEXT",
+        "Standard": "TEXT",
+        "WorkingDay": "TEXT"        
+    }
+}
