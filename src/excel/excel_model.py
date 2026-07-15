@@ -7,7 +7,7 @@ class FileModel:
     Carica e gestisce i modelli Excel definiti in JSON.
     """
 
-    MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models", "update")
+    MODELS_DIR = os.path.join(os.path.dirname(__file__), "..", "models")
 
     @classmethod
     def load_model(cls, codice_file: str):

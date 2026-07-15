@@ -1,0 +1,12 @@
+{
+    "nome_file": "SF_PV_Role_Table.xlsx",
+    "codice": "role_table",
+    "colonne_attese": [
+        "SF Competence",
+        "PV Competence"      
+    ],
+    "tipi_colonne": {
+        "SF Competence": "TEXT",
+        "PV Competence": "TEXT"
+    }
+}
