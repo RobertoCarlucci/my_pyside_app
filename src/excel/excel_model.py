@@ -11,23 +11,28 @@ class FileModel:
 
     @classmethod
     def load_model(cls, codice_file: str):
-        """Carica il file JSON del modello richiesto."""
-        path = os.path.join(cls.MODELS_DIR, f"{codice_file}.json")
-        if not os.path.exists(path):
-            return None
-
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except json.JSONDecodeError as e:
-            raise ValueError(
-                f"Errore nel file di configurazione {codice_file}.json:\n"
-                f"Riga {e.lineno}, Colonna {e.colno}: {e.msg}"
-            ) from e
-        except Exception as e:
-            raise ValueError(
-                f"Errore nel caricamento del modello {codice_file}: {e}"
-            ) from e
+        """Cerca ricorsivamente il modello JSON il cui campo 'codice' == codice_file."""
+        for root, _dirs, files in os.walk(cls.MODELS_DIR):
+            for fname in files:
+                if not fname.endswith(".json"):
+                    continue
+                path = os.path.join(root, fname)
+                try:
+                    with open(path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    if data.get("codice") == codice_file:
+                        return data
+                except json.JSONDecodeError as e:
+                    raise ValueError(
+                        f"Errore nel file di configurazione {fname}:\n"
+                        f"Riga {e.lineno}, Colonna {e.colno}: {e.msg}"
+                    ) from e
+                except Exception as e:
+                    raise ValueError(
+                        f"Errore nel caricamento del modello {codice_file}: {e}"
+                    ) from e
+        return None
+        return None
 
     @classmethod
     def get_colonne_attese(cls, codice_file: str):

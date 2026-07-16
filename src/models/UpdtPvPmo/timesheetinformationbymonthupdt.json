@@ -1,6 +1,6 @@
 {
     "nome_file": "TimesheetInformationByMonth_Updt.xlsx",
-    "codice": "timesheetinformationbymonthupdt",
+    "codice": "timesheet_information_by_month",
     "colonne_attese": [
         "Short Name",
         "Screened Disapproved",
@@ -10,11 +10,12 @@
         "Date"
     ],
     "tipi_colonne": {
-        "Short Name": "TEXT",
-        "Screened Disapproved": "INTEGER",
-        "Screened Overdue": "INTEGER",
-        "Screened Submitted": "INTEGER",
-        "Screened To Approve": "INTEGER",
-        "Date": "DATE"
+        "ShortName": "TEXT",
+        "ScreenedDisapproved": "INTEGER",
+        "ScreenedOverdue": "INTEGER",
+        "ScreenedSubmitted": "INTEGER",
+        "ScreenedToApprove": "INTEGER",
+        "Dateid": "DATE",
+        "IdMonthYear": "TEXT"
     }
 }

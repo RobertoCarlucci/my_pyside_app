@@ -221,14 +221,22 @@ class MainWindow(BasePage):
         if not cartella:
             return
 
-        # Verifica che tutti i file attesi siano presenti
-        reporter_mancanti = ErrorReporter()
-        for m in modelli:
-            if not os.path.isfile(os.path.join(cartella, m["nome_file"])):
-                reporter_mancanti.add(f"File non trovato: '{m['nome_file']}'")
-        if reporter_mancanti.has_errors():
+        # Filtra: considera solo i file attesi che sono presenti nella cartella;
+        # eventuali altri xlsx presenti vengono ignorati.
+        modelli_presenti = [
+            m for m in modelli
+            if os.path.isfile(os.path.join(cartella, m["nome_file"]))
+        ]
+        if not modelli_presenti:
+            reporter_mancanti = ErrorReporter()
+            reporter_mancanti.add(
+                f"Nessun file previsto per '{subdir_modelli}' trovato nella cartella selezionata.\n"
+                f"File attesi: {', '.join(m['nome_file'] for m in modelli)}"
+            )
             ErrorDialog(reporter_mancanti.get_error_text()).exec()
             return
+
+        modelli = modelli_presenti
 
         # Carica e valida ogni file
         dati = []  # lista di (modello, df_validato, percorso)

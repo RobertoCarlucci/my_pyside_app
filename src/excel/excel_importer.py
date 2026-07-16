@@ -37,6 +37,29 @@ class ExcelImporter:
         Funziona per qualsiasi modello definito in JSON.
         progress_callback(current, total): opzionale, per aggiornare la UI.
         """
+        from excel.excel_model import FileModel
+        df = df.copy()
+        modello = FileModel.load_model(codice)
+        if modello:
+            col_attese = modello.get("colonne_attese", [])
+            col_escluse = set(modello.get("colonne_da_rimuovere", []))
+            col_db = list(modello.get("tipi_colonne", {}).keys())
+
+            # Rimuovi le colonne escluse prima del rename
+            if col_escluse:
+                df = df.drop(columns=[c for c in col_escluse if c in df.columns])
+
+            # Rinomina: zip tra colonne_attese rimaste e chiavi tipi_colonne (positional)
+            col_rimanenti = [c for c in col_attese if c not in col_escluse]
+            if col_rimanenti and col_db:
+                rename_map = {
+                    src: dst
+                    for src, dst in zip(col_rimanenti, col_db)
+                    if src != dst
+                }
+                if rename_map:
+                    df = df.rename(columns=rename_map)
+        df.insert(0, "id", range(1, len(df) + 1))
         righe = [
             {col: _to_db(val) for col, val in row.items()} for _, row in df.iterrows()
         ]

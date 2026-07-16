@@ -6,10 +6,28 @@ DB_PATH = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app.db")
 )
 
-# Percorso cartella modelli JSON (relativo a questo file)
-_MODELS_DIR = os.path.normpath(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "update")
+# Cartella radice dei modelli JSON (le sottocartelle vengono cercate ricorsivamente)
+_MODELS_ROOT = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models")
 )
+
+
+def _trova_model_path(tabella: str) -> str | None:
+    """Cerca ricorsivamente in _MODELS_ROOT il file JSON il cui campo 'codice' == tabella."""
+    import json as _json
+    for root, _dirs, files in os.walk(_MODELS_ROOT):
+        for fname in files:
+            if not fname.endswith(".json"):
+                continue
+            path = os.path.join(root, fname)
+            try:
+                with open(path, encoding="utf-8") as f:
+                    data = _json.load(f)
+                if data.get("codice") == tabella:
+                    return path
+            except Exception:
+                continue
+    return None
 
 # Mapping tipi JSON → SQL (compatibile SQLite e MariaDB)
 # SQLite accetta DATE/DATETIME come alias di TEXT affinity;
@@ -48,23 +66,27 @@ def _crea_tabella_se_assente(conn: sqlite3.Connection, tabella: str):
 
     import json
 
-    model_path = os.path.join(_MODELS_DIR, f"{tabella}.json")
-    if not os.path.isfile(model_path):
+    model_path = _trova_model_path(tabella)
+    if model_path is None:
         raise FileNotFoundError(
-            f"Modello JSON non trovato per la tabella '{tabella}': {model_path}"
+            f"Modello JSON non trovato per la tabella '{tabella}' in: {_MODELS_ROOT}"
         )
 
     with open(model_path, encoding="utf-8") as f:
         modello = json.load(f)
 
-    colonne = modello.get("colonne_attese", [])
     tipi = modello.get("tipi_colonne", {})
-    if not colonne:
-        raise ValueError(f"Il modello '{tabella}' non contiene 'colonne_attese'.")
+    colonne = modello.get("colonne_attese", [])
+    if not tipi and not colonne:
+        raise ValueError(f"Il modello '{tabella}' non contiene 'tipi_colonne' né 'colonne_attese'.")
 
-    cols_sql = ",\n    ".join(
-        f'"{c}" {_TIPO_SQL.get(tipi.get(c, "string"), "TEXT")}' for c in colonne
-    )
+    if tipi:
+        cols_sql = ",\n    ".join(
+            f'"{col_db}" {_TIPO_SQL.get(tipo_str, "TEXT")}'
+            for col_db, tipo_str in tipi.items()
+        )
+    else:
+        cols_sql = ",\n    ".join(f'"{c}" TEXT' for c in colonne)
     conn.execute(
         f'CREATE TABLE IF NOT EXISTS "{tabella}" (\n'
         f"    id INTEGER PRIMARY KEY AUTOINCREMENT,\n"
@@ -81,13 +103,17 @@ def crea_tabelle_modelli(modelli: list[dict]):
     try:
         for modello in modelli:
             tabella = modello.get("codice")
-            colonne = modello.get("colonne_attese", [])
             tipi = modello.get("tipi_colonne", {})
-            if not tabella or not colonne:
+            colonne = modello.get("colonne_attese", [])
+            if not tabella or (not tipi and not colonne):
                 continue
-            cols_sql = ",\n    ".join(
-                f'"{c}" {_TIPO_SQL.get(tipi.get(c, "string"), "TEXT")}' for c in colonne
-            )
+            if tipi:
+                cols_sql = ",\n    ".join(
+                    f'"{col_db}" {_TIPO_SQL.get(tipo_str, "TEXT")}'
+                    for col_db, tipo_str in tipi.items()
+                )
+            else:
+                cols_sql = ",\n    ".join(f'"{c}" TEXT' for c in colonne)
             conn.execute(
                 f'CREATE TABLE IF NOT EXISTS "{tabella}" (\n'
                 f"    id INTEGER PRIMARY KEY AUTOINCREMENT,\n"

@@ -33,13 +33,14 @@ class PreviewExcel(QDialog):
         table = QTableWidget()
         max_rows = min(20, len(df))
         table.setRowCount(max_rows)
-        table.setColumnCount(len(df.columns))
-        table.setHorizontalHeaderLabels(df.columns)
+        table.setColumnCount(len(df.columns) + 1)
+        table.setHorizontalHeaderLabels(["id"] + list(df.columns))
 
         for r in range(max_rows):
+            table.setItem(r, 0, QTableWidgetItem(str(r + 1)))
             for c, col in enumerate(df.columns):
                 value = str(df.iloc[r][col])
-                table.setItem(r, c, QTableWidgetItem(value))
+                table.setItem(r, c + 1, QTableWidgetItem(value))
 
         layout.addWidget(table)
 
