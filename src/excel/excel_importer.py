@@ -43,7 +43,8 @@ class ExcelImporter:
         if modello:
             col_attese = modello.get("colonne_attese", [])
             col_escluse = set(modello.get("colonne_da_rimuovere", []))
-            col_db = list(modello.get("tipi_colonne", {}).keys())
+            tipi_colonne: dict = modello.get("tipi_colonne", {})
+            col_db = list(tipi_colonne.keys())
 
             # Rimuovi le colonne escluse prima del rename
             if col_escluse:
@@ -59,6 +60,26 @@ class ExcelImporter:
                 }
                 if rename_map:
                     df = df.rename(columns=rename_map)
+
+            # Converti i tipi dopo il rename (chiavi tipi_colonne == nomi colonna df)
+            for col_db_name, tipo_str in tipi_colonne.items():
+                if col_db_name not in df.columns:
+                    continue
+                tipo = tipo_str.lower()
+                serie = df[col_db_name]
+                try:
+                    if tipo in ("date", "datetime"):
+                        if not pd.api.types.is_datetime64_any_dtype(serie):
+                            df[col_db_name] = pd.to_datetime(serie, errors="coerce", dayfirst=True)
+                    elif tipo in ("int", "integer"):
+                        df[col_db_name] = pd.to_numeric(serie, errors="coerce").astype("Int64")
+                    elif tipo in ("float", "real"):
+                        df[col_db_name] = pd.to_numeric(
+                            serie.astype(str).str.replace(",", "."), errors="coerce"
+                        ).astype(float)
+                except Exception:
+                    pass  # tollerante: lascia il valore così com'è
+
         df.insert(0, "id", range(1, len(df) + 1))
         righe = [
             {col: _to_db(val) for col, val in row.items()} for _, row in df.iterrows()

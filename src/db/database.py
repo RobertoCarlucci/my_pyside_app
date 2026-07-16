@@ -82,7 +82,7 @@ def _crea_tabella_se_assente(conn: sqlite3.Connection, tabella: str):
 
     if tipi:
         cols_sql = ",\n    ".join(
-            f'"{col_db}" {_TIPO_SQL.get(tipo_str, "TEXT")}'
+            f'"{col_db}" {_TIPO_SQL.get(tipo_str.lower(), tipo_str)}'
             for col_db, tipo_str in tipi.items()
         )
     else:
@@ -109,7 +109,7 @@ def crea_tabelle_modelli(modelli: list[dict]):
                 continue
             if tipi:
                 cols_sql = ",\n    ".join(
-                    f'"{col_db}" {_TIPO_SQL.get(tipo_str, "TEXT")}'
+                    f'"{col_db}" {_TIPO_SQL.get(tipo_str.lower(), tipo_str)}'
                     for col_db, tipo_str in tipi.items()
                 )
             else:

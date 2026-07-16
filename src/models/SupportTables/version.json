@@ -2,11 +2,11 @@
     "nome_file": "version.xlsx",
     "codice": "version",
     "colonne_attese": [
-        "PreID",
+        "IdKey",
         "Group"      
     ],
     "tipi_colonne": {
-        "PreID": "TEXT",
+        "IdKey": "TEXT",
         "Group": "TEXT"      
     }
 }

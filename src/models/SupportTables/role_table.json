@@ -6,7 +6,7 @@
         "PV Competence"      
     ],
     "tipi_colonne": {
-        "SF Competence": "TEXT",
-        "PV Competence": "TEXT"
+        "SFCompetence": "TEXT",
+        "PVCompetence": "TEXT"
     }
 }

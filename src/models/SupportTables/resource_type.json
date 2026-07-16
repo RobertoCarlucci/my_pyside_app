@@ -2,8 +2,8 @@
     "nome_file": "ResourceType.xlsx",
     "codice": "resource_type",
     "colonne_attese": [
-        "ResourceTypeGroup",
-        "ResourceType"      
+        "Resource Type Group",
+        "Resource Type"      
     ],
     "tipi_colonne": {
         "ResourceTypeGroup": "TEXT",

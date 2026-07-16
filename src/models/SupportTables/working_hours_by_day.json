@@ -4,7 +4,7 @@
     "colonne_attese": [
         "Dateid",
         "DayNumber",
-        "DayNumber",
+        "DayName",
         "Standard",
         "WorkingDay"        
     ],

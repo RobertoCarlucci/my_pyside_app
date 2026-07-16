@@ -122,9 +122,10 @@ class ExcelValidator:
                 continue
 
             serie = df[col]
+            tipo_lower = tipo.lower()
 
             # INT
-            if tipo == "int":
+            if tipo_lower in ("int", "integer"):
                 try:
                     # Converti con coerce per trasformare errori a NaN
                     df[col] = pd.to_numeric(serie, errors="coerce").astype("Int64")
@@ -133,7 +134,7 @@ class ExcelValidator:
                     pass
 
             # FLOAT
-            elif tipo == "float":
+            elif tipo_lower in ("float", "real"):
                 try:
                     # Gestisci virgole come separatori decimali
                     serie_str = serie.astype(str).str.replace(",", ".")
@@ -143,7 +144,7 @@ class ExcelValidator:
                     pass
 
             # DATE
-            elif tipo == "date":
+            elif tipo_lower in ("date", "datetime"):
                 try:
                     # Se è già datetime64, mantienila
                     if pd.api.types.is_datetime64_any_dtype(serie):

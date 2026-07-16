@@ -2,11 +2,11 @@
     "nome_file": "Org.xlsx",
     "codice": "org",
     "colonne_attese": [
-        "OrganizationOBS",
-        "SubOrgOBS",
-        "ProvidingOrg",
-        "OrganizationElaborata",
-        "SubOrgElaborata"
+        "Organization (OBS)",
+        "Sub Org (OBS)",
+        "Providing Org",
+        "Organization Elaborata",
+        "Sub Org Elaborata"
     ],
     "tipi_colonne": {
         "OrganizationOBS": "TEXT",
