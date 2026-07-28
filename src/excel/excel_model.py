@@ -1,7 +1,6 @@
 import json
 import os
 
-
 class FileModel:
     """
     Carica e gestisce i modelli Excel definiti in JSON.
@@ -32,8 +31,7 @@ class FileModel:
                         f"Errore nel caricamento del modello {codice_file}: {e}"
                     ) from e
         return None
-        return None
-
+       
     @classmethod
     def get_colonne_attese(cls, codice_file: str):
         modello = cls.load_model(codice_file)
@@ -61,8 +59,8 @@ class FileModel:
 
     @classmethod
     def get_all_models(cls):
-        """Ritorna i codici di tutti i modelli Excel disponibili.
 
+        """Ritorna i codici di tutti i modelli Excel disponibili.
         Filtra i JSON in cui 'nome_file' ha estensione .xlsx o .xls;
         ignora silenziosamente i file di altri tipi.
         """

@@ -1,15 +1,26 @@
 import os
 
+from excel.excel_model import FileModel
+from excel.excel_loader import carica_excel
+from excel.excel_validator import ExcelValidator
+from excel.excel_importer import ExcelImporter
+from excel.excel_logger import ExcelLogger
+from ges_error.error_reporter import ErrorReporter
+from ui.preview_excel import PreviewExcel
+from ui.error_dialog import ErrorDialog
+from ui.warning_dialog import WarningDialog
+from PySide6.QtWidgets import QDialog
+
 from PySide6.QtWidgets import QGridLayout, QPushButton, QMessageBox, QApplication, QFileDialog
 from PySide6.QtCore import QSize
 
 from db.database import init_db, crea_tabelle_modelli
-from excel.excel_model import FileModel
 from ui.style.button_styles import apply_button_style, get_icon
 from ui.style.page_style import BasePage
 
 
 class MainWindow(BasePage):
+    
     """
     Finestra principale hub dell'applicazione.
     Layout: griglia 3 colonne × 3 righe
@@ -116,17 +127,7 @@ class MainWindow(BasePage):
         self._excel_window.raise_()
         self._excel_window.activateWindow()
 
-    def _carica_res10(self):
-        from excel.excel_model import FileModel
-        from excel.excel_loader import carica_excel
-        from excel.excel_validator import ExcelValidator
-        from excel.excel_importer import ExcelImporter
-        from excel.excel_logger import ExcelLogger
-        from ges_error.error_reporter import ErrorReporter
-        from ui.preview_excel import PreviewExcel
-        from ui.error_dialog import ErrorDialog
-        from ui.warning_dialog import WarningDialog
-        from PySide6.QtWidgets import QDialog
+    def _carica_res10(self):        
 
         modello = FileModel.load_model("res10")
         if not modello:
@@ -192,15 +193,7 @@ class MainWindow(BasePage):
     def _importa_gruppo(self, subdir_modelli: str):
         """Importa in blocco tutti i file Excel di un gruppo (sottocartella modelli)."""
         import json
-        from excel.excel_loader import carica_excel
-        from excel.excel_validator import ExcelValidator
-        from excel.excel_importer import ExcelImporter
-        from excel.excel_logger import ExcelLogger
-        from ges_error.error_reporter import ErrorReporter
-        from ui.error_dialog import ErrorDialog
-        from ui.warning_dialog import WarningDialog
-        from PySide6.QtWidgets import QDialog
-
+        
         models_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "models", subdir_modelli
         )
